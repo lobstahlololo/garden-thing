@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MicroGrow · Hyper-Local Garden Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter','system-ui','sans-serif'],
+            display: ['Fraunces','Georgia','serif'],
+          },
+          colors: {
+            bark: {
+              50:  '#faf7f2',
+              100: '#f1ead9',
+              200: '#e2d4b6',
+              400: '#a8916a',
+              600: '#6e5a35',
+              800: '#3f3320',
+              900: '#241d12',
+            },
+            moss: {
+              50:  '#f3f7ef',
+              100: '#e6eedb',
+              400: '#9bbb7b',
+              500: '#7aa355',
+              600: '#5e8540',
+              700: '#4a6a32',
+              800: '#385128',
+              900: '#243718',
+            },
+            clay: {
+              400: '#d99669',
+              500: '#c87b46',
+              600: '#a8612f',
+              700: '#874b22',
+            },
+          },
+          boxShadow: {
+            leaf: '0 10px 30px -12px rgba(36, 71, 24, 0.25)',
+            soil: '0 6px 24px -10px rgba(63, 51, 32, 0.35)',
+          },
+          animation: {
+            'pulse-soft': 'pulseSoft 2.2s cubic-bezier(0.4,0,0.6,1) infinite',
+            'fade-up': 'fadeUp .35s ease-out both',
+          },
+          keyframes: {
+            pulseSoft: {
+              '0%,100%': { boxShadow: '0 0 0 0 rgba(217,150,105,0.6)' },
+              '50%':     { boxShadow: '0 0 0 12px rgba(217,150,105,0)' },
+            },
+            fadeUp: {
+              '0%':   { opacity: 0, transform: 'translateY(6px)' },
+              '100%': { opacity: 1, transform: 'translateY(0)' },
+            },
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    html, body { background: #faf7f2; }
+    body { font-family: 'Inter', system-ui, sans-serif; color: #241d12; }
+    .display { font-family: 'Fraunces', Georgia, serif; font-feature-settings: "ss01"; }
+    .leaf-bg {
+      background-image:
+        radial-gradient(circle at 12% 18%, rgba(122,163,85,.18) 0, transparent 38%),
+        radial-gradient(circle at 88% 8%,  rgba(217,150,105,.22) 0, transparent 35%),
+        radial-gradient(circle at 50% 100%, rgba(74,106,50,.10) 0, transparent 60%);
+    }
+    .grain::before {
+      content: '';
+      position: absolute; inset: 0; pointer-events: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.15  0 0 0 0 0.13  0 0 0 0 0.09  0 0 0 0.04 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+      opacity: .35; mix-blend-mode: multiply; border-radius: inherit;
+    }
+    .scroll-quiet::-webkit-scrollbar { width: 8px; height: 8px; }
+    .scroll-quiet::-webkit-scrollbar-thumb { background: #e2d4b6; border-radius: 8px; }
+    .scroll-quiet::-webkit-scrollbar-thumb:hover { background: #a8916a; }
+    .select-leaf {
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 20 20' fill='%23385128'><path d='M5.516 7.548a.75.75 0 011.06.02L10 11.06l3.424-3.49a.75.75 0 111.08 1.04l-3.96 4.04a.75.75 0 01-1.08 0l-3.96-4.04a.75.75 0 01.012-1.06z'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right .75rem center;
+      background-size: 14px;
+    }
+  </style>
+</head>
+
+<body class="antialiased min-h-screen leaf-bg">
+
+  <!-- ============== HEADER ============== -->
+  <header class="relative overflow-hidden bg-gradient-to-br from-moss-900 via-moss-700 to-moss-500 text-bark-50 grain">
+    <div class="max-w-7xl mx-auto px-6 sm:px-10 py-7 sm:py-9 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 relative z-10">
+      <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-2xl bg-bark-50/15 backdrop-blur-sm border border-bark-50/30 grid place-items-center shadow-leaf">
+          <!-- Leaf glyph -->
+          <svg viewBox="0 0 64 64" class="w-9 h-9 text-bark-50" fill="currentColor" aria-hidden="true">
+            <path d="M52 6C30 8 14 22 8 40c-2 6-2 12 0 18 2-22 18-36 40-40-12 4-22 14-26 28-3 11 0 18 8 22 4-20 18-36 38-44 6-2 8-6 6-12-2-6-8-8-22-6z"/>
+            <path d="M14 52c-2 1-4 3-4 6 4-1 7-3 9-6l-5 0z" opacity=".7"/>
+          </svg>
+        </div>
+        <div>
+          <p class="uppercase tracking-[0.22em] text-[11px] text-bark-100/80 font-medium">Garden Intelligence</p>
+          <h1 class="display text-3xl sm:text-4xl font-semibold leading-tight">
+            MicroGrow <span class="text-clay-400">·</span> Hyper-Local Garden Planner
+          </h1>
+          <p class="text-sm text-bark-100/85 mt-1 max-w-xl">
+            Real-time weather + your yard's micro-climate — frost dates and planting windows tuned to the soil under your boots.
+          </p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 text-sm">
+        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-bark-50/10 border border-bark-50/20">
+          <span class="relative flex h-2.5 w-2.5">
+            <span class="absolute inline-flex h-full w-full rounded-full bg-clay-400 opacity-75 animate-ping"></span>
+            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-clay-500"></span>
+          </span>
+          <span id="liveLabel" class="text-bark-50/90 font-medium">Awaiting location…</span>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============== MAIN ============== -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
+    <div class="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6 lg:gap-8">
+
+      <!-- =========== SIDEBAR =========== -->
+      <aside class="space-y-5 lg:sticky lg:top-6 lg:self-start">
+
+        <!-- Location card -->
+        <section class="relative bg-white border border-bark-100 rounded-2xl shadow-soil p-5 overflow-hidden">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="display text-lg font-semibold text-moss-800">📍 Location</h2>
+            <span class="text-[11px] uppercase tracking-wider text-bark-600">Step 1</span>
+          </div>
+          <label for="locationInput" class="text-xs font-medium text-bark-600">City, town, or ZIP code (worldwide)</label>
+          <div class="mt-1.5 flex gap-2">
+            <input
+              id="locationInput"
+              type="text"
+              value="Basking Ridge, NJ"
+              placeholder="e.g. Basking Ridge, NJ"
+              class="flex-1 rounded-xl border-bark-200 bg-bark-50/40 px-3.5 py-2.5 text-sm text-bark-900 placeholder-bark-400 focus:border-moss-500 focus:ring-2 focus:ring-moss-200 outline-none"
+            />
+          </div>
+          <button
+            id="updateLocationBtn"
+            class="mt-3 w-full inline-flex items-center justify-center gap-2 bg-moss-700 hover:bg-moss-800 active:bg-moss-900 text-bark-50 text-sm font-medium px-4 py-2.5 rounded-xl shadow-soil transition"
+          >
+            <svg viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path d="M10 2a1 1 0 011 1v3.07A6.002 6.002 0 0117 12h2a1 1 0 110 2h-2.06A6.002 6.002 0 0111 17.93V21a1 1 0 11-2 0v-3.07A6.002 6.002 0 013.06 14H1a1 1 0 110-2h2.06A6.002 6.002 0 019 6.07V3a1 1 0 011-1z"/></svg>
+            Update Location
+          </button>
+          <p id="locationStatus" class="text-[11px] text-bark-600 mt-2 min-h-[1em]"></p>
+        </section>
+
+        <!-- Topography card -->
+        <section class="bg-white border border-bark-100 rounded-2xl shadow-soil p-5">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="display text-lg font-semibold text-moss-800">⛰️ Topography</h2>
+            <span class="text-[11px] uppercase tracking-wider text-bark-600">Step 2</span>
+          </div>
+          <label for="topography" class="text-xs font-medium text-bark-600">Where in the yard?</label>
+          <select id="topography"
+            class="select-leaf mt-1.5 w-full rounded-xl border-bark-200 bg-bark-50/40 px-3.5 py-2.5 text-sm text-bark-900 focus:border-moss-500 focus:ring-2 focus:ring-moss-200 outline-none appearance-none pr-9">
+            <option value="flat">🌾 Flat ground</option>
+            <option value="hilltop">💨 Hilltop / High Wind Ridge</option>
+            <option value="valley">🌫️ Valley / Frost pocket</option>
+            <option value="south-slope">☀️ South-facing warm slope</option>
+            <option value="north-slope">🧊 North-facing cold slope</option>
+          </select>
+        </section>
+
+        <!-- Infrastructure card -->
+        <section class="bg-white border border-bark-100 rounded-2xl shadow-soil p-5">
+          <h2 class="display text-lg font-semibold text-moss-800 mb-3">🏡 Surrounding Infrastructure</h2>
+          <label for="infrastructure" class="text-xs font-medium text-bark-600">What's right next to the bed?</label>
+          <select id="infrastructure"
+            class="select-leaf mt-1.5 w-full rounded-xl border-bark-200 bg-bark-50/40 px-3.5 py-2.5 text-sm text-bark-900 focus:border-moss-500 focus:ring-2 focus:ring-moss-200 outline-none appearance-none pr-9">
+            <option value="open">🌳 Open lawn</option>
+            <option value="trees">🌲 Dense tree canopy</option>
+            <option value="wall">🧱 Next to brick/concrete wall heat-sink</option>
+            <option value="overhang">🏠 Under a deep roof overhang</option>
+          </select>
+        </section>
+
+        <!-- Soil card -->
+        <section class="bg-white border border-bark-100 rounded-2xl shadow-soil p-5">
+          <h2 class="display text-lg font-semibold text-moss-800 mb-3">🪨 Soil Type</h2>
+          <label for="soil" class="text-xs font-medium text-bark-600">What's under your boots?</label>
+          <select id="soil"
+            class="select-leaf mt-1.5 w-full rounded-xl border-bark-200 bg-bark-50/40 px-3.5 py-2.5 text-sm text-bark-900 focus:border-moss-500 focus:ring-2 focus:ring-moss-200 outline-none appearance-none pr-9">
+            <option value="clay">🟤 Heavy clay</option>
+            <option value="sand">🟡 Loose sand</option>
+            <option value="loam" selected>🟢 Rich loam</option>
+          </select>
+        </section>
+
+        <!-- Action -->
+        <button id="calculateBtn"
+          class="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-br from-clay-500 to-clay-700 hover:from-clay-600 hover:to-clay-700 text-bark-50 text-base font-semibold px-5 py-3.5 rounded-2xl shadow-leaf transition active:scale-[.99]">
+          🌱 Calculate Micro-Climate &amp; Fetch Weather
+        </button>
+
+        <p class="text-[11px] text-bark-600 text-center px-2">
+          Edits to dropdowns update the dashboard instantly. The button re-pulls live data.
+        </p>
+      </aside>
+
+      <!-- =========== DASHBOARD =========== -->
+      <section class="space-y-6 min-w-0">
+
+        <!-- Live weather + Scorecard row -->
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
+
+          <!-- Live weather card -->
+          <article id="weatherCard" class="md:col-span-3 relative bg-white border border-bark-100 rounded-2xl shadow-soil p-6 overflow-hidden">
+            <div class="pointer-events-none absolute -top-12 -right-12 w-44 h-44 rounded-full bg-clay-400/20"></div>
+            <div class="pointer-events-none absolute -bottom-16 -left-10 w-44 h-44 rounded-full bg-moss-500/15"></div>
+
+            <div class="flex items-start justify-between gap-4 relative">
+              <div>
+                <p class="text-[11px] uppercase tracking-wider text-bark-600 font-medium">Live Conditions</p>
+                <h3 id="wxCity" class="display text-2xl font-semibold text-bark-900 mt-0.5">—</h3>
+                <p id="wxCoords" class="text-xs text-bark-600 mt-0.5">—</p>
+              </div>
+              <div class="text-right">
+                <div id="wxIcon" class="text-4xl">🌤️</div>
+                <p id="wxUpdated" class="text-[11px] text-bark-600 mt-1">—</p>
+              </div>
+            </div>
+
+            <div class="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3 relative">
+              <div class="bg-bark-50/70 rounded-xl p-3">
+                <p class="text-[11px] uppercase tracking-wider text-bark-600">Temperature</p>
+                <p class="display text-2xl font-semibold text-bark-900 leading-tight mt-0.5">
+                  <span id="wxTemp">—</span><span class="text-sm text-bark-600">°F</span>
+                </p>
+                <p id="wxTempAdj" class="text-[11px] text-moss-700 font-medium mt-1 min-h-[1em]"></p>
+              </div>
+              <div class="bg-bark-50/70 rounded-xl p-3">
+                <p class="text-[11px] uppercase tracking-wider text-bark-600">Wind</p>
+                <p class="display text-2xl font-semibold text-bark-900 leading-tight mt-0.5">
+                  <span id="wxWind">—</span><span class="text-sm text-bark-600">mph</span>
+                </p>
+                <p id="wxWindNote" class="text-[11px] text-clay-700 font-medium mt-1 min-h-[1em]"></p>
+              </div>
+              <div class="bg-bark-50/70 rounded-xl p-3">
+                <p class="text-[11px] uppercase tracking-wider text-bark-600">Precipitation</p>
+                <p class="display text-2xl font-semibold text-bark-900 leading-tight mt-0.5">
+                  <span id="wxPrecip">—</span><span class="text-sm text-bark-600">in</span>
+                </p>
+                <p id="wxPrecipNote" class="text-[11px] text-moss-700 font-medium mt-1 min-h-[1em]"></p>
+              </div>
+              <div class="bg-bark-50/70 rounded-xl p-3">
+                <p class="text-[11px] uppercase tracking-wider text-bark-600">Humidity</p>
+                <p class="display text-2xl font-semibold text-bark-900 leading-tight mt-0.5">
+                  <span id="wxHumid">—</span><span class="text-sm text-bark-600">%</span>
+                </p>
+                <p class="text-[11px] text-bark-600 mt-1">Relative</p>
+              </div>
+            </div>
+
+            <div id="wxBadge" class="hidden mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-clay-100 text-clay-700 text-xs font-medium"></div>
+          </article>
+
+          <!-- Scorecard -->
+          <article id="scorecard" class="md:col-span-2 bg-white border border-bark-100 rounded-2xl shadow-soil p-6">
+            <p class="text-[11px] uppercase tracking-wider text-bark-600 font-medium">Micro-Climate Scorecard</p>
+            <h3 class="display text-2xl font-semibold text-bark-900 mt-0.5">vs. Regional Average</h3>
+            <p class="text-xs text-bark-600 mt-1">How your yard differs from the nearest weather station.</p>
+
+            <div id="scoreList" class="mt-5 flex flex-wrap gap-2"></div>
+
+            <div class="mt-5 pt-5 border-t border-bark-100">
+              <p class="text-[11px] uppercase tracking-wider text-bark-600 font-medium">Adjusted frost anchor</p>
+              <div class="grid grid-cols-2 gap-3 mt-2">
+                <div>
+                  <p class="text-xs text-bark-600">Last spring frost</p>
+                  <p id="lastFrostAdj" class="display text-xl font-semibold text-moss-800 mt-0.5">—</p>
+                  <p id="lastFrostDelta" class="text-[11px] text-bark-600 mt-0.5 min-h-[1em]"></p>
+                </div>
+                <div>
+                  <p class="text-xs text-bark-600">First autumn frost</p>
+                  <p id="firstFrostAdj" class="display text-xl font-semibold text-clay-700 mt-0.5">—</p>
+                  <p id="firstFrostDelta" class="text-[11px] text-bark-600 mt-0.5 min-h-[1em]"></p>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <!-- Alerts feed -->
+        <article class="bg-white border border-bark-100 rounded-2xl shadow-soil p-6">
+          <div class="flex items-center justify-between gap-3 flex-wrap">
+            <div>
+              <p class="text-[11px] uppercase tracking-wider text-bark-600 font-medium">Dynamic Alerts Feed</p>
+              <h3 class="display text-2xl font-semibold text-bark-900 mt-0.5">Recommendations for your yard</h3>
+            </div>
+            <span id="alertCount" class="text-[11px] px-2.5 py-1 rounded-full bg-bark-100 text-bark-800 font-medium">0 alerts</span>
+          </div>
+          <ul id="alertList" class="mt-4 space-y-2.5"></ul>
+        </article>
+
+        <!-- Planting table -->
+        <article class="bg-white border border-bark-100 rounded-2xl shadow-soil p-6 overflow-hidden">
+          <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
+            <div>
+              <p class="text-[11px] uppercase tracking-wider text-bark-600 font-medium">Adjusted Planting Schedule</p>
+              <h3 class="display text-2xl font-semibold text-bark-900 mt-0.5">Popular crops for your zone</h3>
+            </div>
+            <p class="text-xs text-bark-600 max-w-md">
+              Dates shift from the historical baseline <span class="font-medium">Apr 25</span> (last spring frost) — <span class="font-medium">Oct 15</span> (first autumn frost) using your yard modifiers.
+            </p>
+          </div>
+          <div class="overflow-x-auto scroll-quiet -mx-6 px-6">
+            <table class="min-w-full text-sm">
+              <thead>
+                <tr class="text-left text-bark-600 border-b border-bark-200">
+                  <th class="py-2 pr-4 font-medium uppercase tracking-wider text-[11px]">Crop</th>
+                  <th class="py-2 pr-4 font-medium uppercase tracking-wider text-[11px]">Type</th>
+                  <th class="py-2 pr-4 font-medium uppercase tracking-wider text-[11px]">Standard Local Date</th>
+                  <th class="py-2 pr-4 font-medium uppercase tracking-wider text-[11px]">Your Adjusted Date</th>
+                  <th class="py-2 pr-4 font-medium uppercase tracking-wider text-[11px]">Shift</th>
+                  <th class="py-2 font-medium uppercase tracking-wider text-[11px]">Notes</th>
+                </tr>
+              </thead>
+              <tbody id="plantTable"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <p class="text-[11px] text-bark-600 text-center pt-2">
+          Weather data · <a class="underline hover:text-moss-700" href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> · Baseline frost dates are regional heuristics, tune them to your 10-year USDA/NWS average.
+        </p>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    /* ============================================================
+       MicroGrow · single-file garden planner
+       Stack: vanilla JS + Tailwind (CDN) + Open-Meteo (no auth)
+       ============================================================ */
+
+    /* ---------- Config / baselines ---------- */
+    const BASELINE = {
+      // seed values; in a real app these would be USDA hardiness-zone aware
+      lastSpringFrost:  new Date(2025, 3, 25), // Apr 25
+      firstAutumnFrost: new Date(2025, 9, 15), // Oct 15
+    };
+
+    const CROPS = [
+      { id:'tomato',  name:'Tomatoes',  emoji:'🍅', kind:'warm',   offset: 7,  note:'Warm season, transplant after frost.' },
+      { id:'pepper',  name:'Peppers',   emoji:'🌶️', kind:'warm',  offset: 10, note:'Warm season, slow to start.' },
+      { id:'bean',    name:'Beans',     emoji:'🫘', kind:'warm',   offset: 5,  note:'Direct-sow after frost.' },
+      { id:'cucumber',name:'Cucumbers', emoji:'🥒', kind:'warm',   offset: 7,  note:'Warm season, loves heat.' },
+      { id:'squash',  name:'Squash',    emoji:'🎃', kind:'warm',   offset: 7,  note:'Warm season, plentiful harvest.' },
+      { id:'lettuce', name:'Lettuce',   emoji:'🥬', kind:'cool-spring', offset: -14, note:'Cool, frost-tolerant.' },
+      { id:'carrot',  name:'Carrots',   emoji:'🥕', kind:'cool-spring', offset: -10, note:'Cool, root crop.' },
+      { id:'spinach', name:'Spinach',   emoji:'🌱', kind:'cool-spring', offset: -28, note:'Cool, very cold-hardy.' },
+      { id:'peas',    name:'Peas',      emoji:'🫛', kind:'cool-spring', offset: -28, note:'Cool, plant early.' },
+      { id:'radish',  name:'Radishes',  emoji:'🌶️', kind:'cool-spring', offset: -28, note:'Cool, ready in ~25 days.' },
+      { id:'kale-s',  name:'Kale (spring)', emoji:'🥬', kind:'cool-spring', offset: -21, note:'Hardy, sweetened by frost.' },
+      { id:'kale-f',  name:'Kale (fall)',   emoji:'🥬', kind:'cool-fall',   offset: -56, note:'Plant for autumn harvest.' },
+      { id:'garlic',  name:'Garlic',    emoji:'🧄', kind:'cool-fall',   offset: -14, note:'Fall-planted, mulch heavily.' },
+    ];
+
+    // Weather code (WMO) → emoji
+    const WX_ICON = {
+      0:'☀️', 1:'🌤️', 2:'⛅', 3:'☁️',
+      45:'🌫️', 48:'🌫️',
+      51:'🌦️', 53:'🌦️', 55:'🌧️',
+      56:'🌧️', 57:'🌧️',
+      61:'🌧️', 63:'🌧️', 65:'🌧️',
+      66:'🌧️', 67:'🌧️',
+      71:'❄️', 73:'❄️', 75:'❄️', 77:'❄️',
+      80:'🌦️', 81:'🌦️', 82:'⛈️',
+      85:'🌨️', 86:'🌨️',
+      95:'⛈️', 96:'⛈️', 99:'⛈️',
+    };
+    const WX_LABEL = {
+      0:'Clear', 1:'Mainly clear', 2:'Partly cloudy', 3:'Overcast',
+      45:'Fog', 48:'Depositing rime fog',
+      51:'Light drizzle', 53:'Drizzle', 55:'Heavy drizzle',
+      56:'Freezing drizzle', 57:'Heavy freezing drizzle',
+      61:'Light rain', 63:'Rain', 65:'Heavy rain',
+      66:'Freezing rain', 67:'Heavy freezing rain',
+      71:'Light snow', 73:'Snow', 75:'Heavy snow', 77:'Snow grains',
+      80:'Showers', 81:'Heavy showers', 82:'Violent showers',
+      85:'Snow showers', 86:'Heavy snow showers',
+      95:'Thunderstorm', 96:'Thunderstorm + hail', 99:'Severe thunderstorm',
+    };
+
+    /* ---------- App state ---------- */
+    const state = {
+      topography: 'flat',
+      infrastructure: 'open',
+      soil: 'loam',
+      geo: null,        // { name, country, latitude, longitude, admin1 }
+      weather: null,    // current weather payload
+      loading: false,
+      lastFetchAt: null,
+    };
+
+    /* ---------- DOM references ---------- */
+    const $ = (id) => document.getElementById(id);
+    const els = {
+      locInput: $('locationInput'),
+      updateLocBtn: $('updateLocationBtn'),
+      calculateBtn: $('calculateBtn'),
+      locStatus: $('locationStatus'),
+      topography: $('topography'),
+      infrastructure: $('infrastructure'),
+      soil: $('soil'),
+      liveLabel: $('liveLabel'),
+      wxCity: $('wxCity'), wxCoords: $('wxCoords'),
+      wxIcon: $('wxIcon'), wxUpdated: $('wxUpdated'),
+      wxTemp: $('wxTemp'), wxTempAdj: $('wxTempAdj'),
+      wxWind: $('wxWind'), wxWindNote: $('wxWindNote'),
+      wxPrecip: $('wxPrecip'), wxPrecipNote: $('wxPrecipNote'),
+      wxHumid: $('wxHumid'),
+      wxBadge: $('wxBadge'),
+      scoreList: $('scoreList'),
+      lastFrostAdj: $('lastFrostAdj'),
+      lastFrostDelta: $('lastFrostDelta'),
+      firstFrostAdj: $('firstFrostAdj'),
+      firstFrostDelta: $('firstFrostDelta'),
+      alertList: $('alertList'),
+      alertCount: $('alertCount'),
+      plantTable: $('plantTable'),
+    };
+
+    /* ---------- Helpers ---------- */
+    const fmtDate = (d) => d.toLocaleDateString(undefined, { month:'short', day:'numeric' });
+    const fmtDateLong = (d) => d.toLocaleDateString(undefined, { weekday:'short', month:'short', day:'numeric' });
+    const fmtTime = (d) => d.toLocaleTimeString(undefined, { hour:'numeric', minute:'2-digit' });
+    const addDays = (d, n) => { const c = new Date(d); c.setDate(c.getDate() + n); return c; };
+    const signed = (n) => (n > 0 ? '+' : '') + n;
+
+    /* ============================================================
+       API · Open-Meteo (no key, no auth)
+       ============================================================ */
+    // Open-Meteo's geocoding service returns empty results when the query
+    // includes a trailing state/country suffix ("Basking Ridge, NJ") or for
+    // small unincorporated towns without a country hint, so we try a sequence
+    // of progressively broader candidates before giving up.
+    function stripStateSuffix(s) {
+      return (s || '')
+        .replace(/,?\s+(?:US|USA|United States(?:\s+of\s+America)?)\s*$/i, '')
+        .replace(/,?\s+[A-Z]{2}\s*$/, '')
+        .replace(/,?\s+(Alabama|Alaska|Arizona|Arkansas|California|Colorado|Connecticut|Delaware|Florida|Georgia|Hawaii|Idaho|Illinois|Indiana|Iowa|Kansas|Kentucky|Louisiana|Maine|Maryland|Massachusetts|Michigan|Minnesota|Mississippi|Missouri|Montana|Nebraska|Nevada|New\s+Hampshire|New\s+Jersey|New\s+Mexico|New\s+York|North\s+Carolina|North\s+Dakota|Ohio|Oklahoma|Oregon|Pennsylvania|Rhode\s+Island|South\s+Carolina|South\s+Dakota|Tennessee|Texas|Utah|Vermont|Virginia|Washington|West\s+Virginia|Wisconsin|Wyoming)\s*$/i, '')
+        .trim();
+    }
+
+    async function geocode(rawName) {
+      const input = (rawName || '').trim();
+      if (!input) throw new Error('Enter a city or ZIP code first.');
+      const stripped = stripStateSuffix(input);
+      const zip = input.match(/\b\d{5}(?:-\d{4})?\b/);
+      const looksUS = /\b[A-Z]{2}\b/.test(input) || /,\s*(?:US|USA|United States)\b/i.test(input);
+      const candidates = [];
+      if (stripped)                       candidates.push({ name: stripped,         countryCode: undefined });
+      if (stripped && stripped !== input) candidates.push({ name: input,           countryCode: undefined });
+      if (looksUS && stripped)            candidates.push({ name: stripped,         countryCode: 'US' });
+      if (zip)                            candidates.push({ name: zip[0].slice(0, 5), countryCode: 'US' });
+
+      for (const c of candidates) {
+        if (!c.name) continue;
+        try {
+          const url = new URL('https://geocoding-api.open-meteo.com/v1/search');
+          url.searchParams.set('name', c.name);
+          url.searchParams.set('count', '1');
+          url.searchParams.set('language', 'en');
+          url.searchParams.set('format', 'json');
+          if (c.countryCode) url.searchParams.set('countryCode', c.countryCode);
+          const res = await fetch(url);
+          if (!res.ok) continue;
+          const data = await res.json();
+          if (data.results && data.results.length) {
+            const r = data.results[0];
+            return {
+              name: r.name,
+              country: r.country || '',
+              admin1: r.admin1 || '',
+              latitude: r.latitude,
+              longitude: r.longitude,
+            };
+          }
+        } catch (e) { /* fall through to next candidate */ }
+      }
+      throw new Error(`No match for "${input}". Try a 5-digit ZIP (e.g. 07920) or a bigger nearby city.`);
+    }
+
+    async function fetchWeather(lat, lon) {
+      const url =
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
+        `&current=temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m,weather_code,is_day` +
+        `&daily=temperature_2m_min,temperature_2m_max&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&forecast_days=1&timezone=auto`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Weather service unavailable');
+      return await res.json();
+    }
+
+    async function refreshLocation(rawName) {
+      const query = (rawName || '').trim();
+      if (!query) { setStatus('⚠️ Enter a city or ZIP code.', 'warn'); return; }
+      state.loading = true;
+      setStatus('🔎 Looking up coordinates…', 'info');
+      els.updateLocBtn.disabled = true;
+      els.calculateBtn.disabled = true;
+      try {
+        const geo = await geocode(query);
+        state.geo = geo;
+        setStatus('🌤 Pulling live forecast…', 'info');
+        const wx = await fetchWeather(geo.latitude, geo.longitude);
+        state.weather = wx;
+        state.lastFetchAt = new Date();
+        setStatus(`✓ ${geo.name}${geo.admin1 ? ', ' + geo.admin1 : ''}${geo.country ? ' · ' + geo.country : ''}`, 'ok');
+        render();
+      } catch (err) {
+        console.error(err);
+        setStatus('❌ ' + err.message, 'err');
+      } finally {
+        state.loading = false;
+        els.updateLocBtn.disabled = false;
+        els.calculateBtn.disabled = false;
+      }
+    }
+
+    function setStatus(msg, kind) {
+      els.locStatus.textContent = msg;
+      const color =
+        kind === 'ok'  ? 'text-moss-700' :
+        kind === 'err' ? 'text-red-600' :
+        kind === 'warn'? 'text-clay-700' : 'text-bark-600';
+      els.locStatus.className = `text-[11px] mt-2 min-h-[1em] font-medium ${color}`;
+    }
+
+    /* ============================================================
+       Modifier engine · pure function over (topo, infra, soil, wx)
+       ============================================================ */
+    function computeMods(st) {
+      const mod = {
+        springShift: 0,     // days; + = later frost, - = earlier
+        autumnShift: 0,      // days; + = later frost, - = earlier
+        soilDelay:   0,     // days added to soil-warm-season crops
+        thermalF:    0,     // °F buffer (added to displayed temp & scorecard)
+        scoreChips:  [],    // visual chips in micro-climate scorecard
+        alerts:      [],    // user-facing recommendations
+        weatherFlags:[],    // badges overlaid on the weather card
+      };
+
+      // ------- Topography -------
+      switch (st.topography) {
+        case 'flat':
+          mod.scoreChips.push({ emoji:'🌾', label:'Baseline', tone:'neutral', sub:'Standard exposure' });
+          break;
+        case 'hilltop':
+          mod.weatherFlags.push({ emoji:'💨', tone:'warn',
+            text:'High Wind Warning — exposed ridge. Use row covers & stake tall crops.' });
+          mod.alerts.push({
+            icon:'💨', tone:'warn',
+            title:'High Wind Vulnerability',
+            body:'Hilltops see 10–25% higher sustained winds than the regional weather station. Stake tomatoes, use windbreak netting, and mulch to prevent desiccation.',
+          });
+          break;
+        case 'valley':
+          mod.springShift += 5;
+          mod.autumnShift -= 5;
+          mod.scoreChips.push({ emoji:'🌫️', label:'Frost pocket', tone:'cool', sub:'−10 day season' });
+          mod.alerts.push({
+            icon:'⚠️', tone:'alert',
+            title:'Frost pocket detected',
+            body:'Your valley layout means your garden will freeze 5 days earlier in autumn and wake up 5 days later in spring than the local weather station benchmark. Plan frost protection through April 30.',
+          });
+          break;
+        case 'south-slope':
+          mod.springShift -= 4;
+          mod.thermalF += 3;
+          mod.scoreChips.push({ emoji:'☀️', label:'+3°F thermal buffer', tone:'warm', sub:'South-facing sun trap' });
+          break;
+        case 'north-slope':
+          mod.springShift += 2;
+          mod.scoreChips.push({ emoji:'🧊', label:'Cold-slope penalty', tone:'cool', sub:'+2 day spring delay' });
+          mod.alerts.push({
+            icon:'🧊', tone:'cool',
+            title:'Cold-slope penalty',
+            body:'A north-facing slope receives less direct sun. Expect germination 2 days later than the regional baseline.',
+          });
+          break;
+      }
+
+      // ------- Infrastructure -------
+      switch (st.infrastructure) {
+        case 'open':
+          // nothing extra
+          break;
+        case 'trees':
+          mod.scoreChips.push({ emoji:'🌳', label:'Dappled shade', tone:'mild', sub:'Tree windbreak' });
+          mod.alerts.push({
+            icon:'🌳', tone:'mild',
+            title:'Tree-canopy buffer detected',
+            body:'Dense tree canopy gives a windbreak and ~1–2°F cooler peak summer temps. Best for lettuce, kale, and other cool-loving crops.',
+          });
+          break;
+        case 'wall':
+          mod.springShift -= 4;
+          mod.thermalF += 3;
+          mod.scoreChips.push({ emoji:'🧱', label:'+3°F thermal buffer', tone:'warm', sub:'Wall heat-sink' });
+          mod.alerts.push({
+            icon:'🧱', tone:'warm',
+            title:'Heat-sink wall detected',
+            body:'A south or west-facing masonry wall re-radiates stored heat overnight, nudging spring safe-plant dates 4 days earlier. Excellent for early tomatoes against the wall, less so in mid-summer.',
+          });
+          break;
+        case 'overhang':
+          if (!mod.weatherFlags.find(f => f.text?.startsWith('Rain Shadow'))) {
+            mod.weatherFlags.push({ emoji:'🏠', tone:'cool',
+              text:'Rain Shadow Alert — automated precipitation data may not reach these plants. Hand-watering mandatory.' });
+          }
+          mod.alerts.push({
+            icon:'🏠', tone:'cool',
+            title:'Rain Shadow Alert',
+            body:'Under a deep roof overhang, automated precipitation data may not reach these plants. Hand-watering mandatory. Install a simple rain gauge if you want to budget irrigation accurately.',
+          });
+          break;
+      }
+
+      // ------- Soil -------
+      switch (st.soil) {
+        case 'clay':
+          mod.soilDelay += 4;
+          mod.scoreChips.push({ emoji:'🟤', label:'Soil-warming delay', tone:'cool', sub:'+4 days (clay)' });
+          mod.alerts.push({
+            icon:'🟤', tone:'cool',
+            title:'Heavy clay soil',
+            body:'Clay warms and drains slowly. Spring planting dates for warm-season crops are delayed 4 days. Mix in compost and consider raised beds to break the lag.',
+          });
+          break;
+        case 'sand':
+          mod.soilDelay -= 1;
+          mod.scoreChips.push({ emoji:'🟡', label:'Fast-warming soil', tone:'warm', sub:'−1 day (sand)' });
+          break;
+        case 'loam':
+          // baseline
+          break;
+      }
+
+      // ------- Live weather-driven alerts -------
+      if (st.weather?.current) {
+        const c = st.weather.current;
+        const f = c.temperature_2m;
+        if (typeof f === 'number' && f < 36) {
+          mod.alerts.unshift({
+            icon:'🥶', tone:'emergency',
+            title:`Emergency · Live temp ${Math.round(f)}°F`,
+            body:'Live temperature below 36°F. Cover tender plants tonight or you risk overnight kill. The valley and overhang modifiers raise local risk further.',
+          });
+        } else if (typeof f === 'number' && f < 45) {
+          mod.alerts.unshift({
+            icon:'❄️', tone:'alert',
+            title:`Cold snap · Live temp ${Math.round(f)}°F`,
+            body:'Live temperature is in the cool-snap range. Hold off on warm-season transplants for another 24–48 hours.',
+          });
+        }
+        if (typeof c.wind_speed_10m === 'number' && c.wind_speed_10m > 20) {
+          mod.weatherFlags.push({ emoji:'🌬️', tone:'warn',
+            text:`Sustained winds ${Math.round(c.wind_speed_10m)} mph — protect pollenators & freshly-transplanted seedlings.` });
+        }
+      }
+
+      return mod;
+    }
+
+    /* ============================================================
+       Render
+       ============================================================ */
+    function render() {
+      const st = state;
+      const mod = computeMods(st);
+
+      // --- Weather card ---
+      if (st.weather?.current) {
+        const c = st.weather.current;
+        const g = st.geo;
+        els.wxCity.textContent = g ? `${g.name}${g.admin1 ? ', ' + g.admin1 : ''}` : '—';
+        els.wxCoords.textContent = g ? `${g.country || ''} · ${g.latitude.toFixed(2)}°, ${g.longitude.toFixed(2)}°` : '—';
+        const code = c.weather_code ?? 0;
+        els.wxIcon.textContent = WX_ICON[code] || '🌤️';
+        els.wxUpdated.textContent = `${WX_LABEL[code] || 'Conditions'} · updated ${fmtTime(st.lastFetchAt || new Date())}`;
+
+        const baseF = Math.round(c.temperature_2m);
+        const adjF  = baseF + Math.round(mod.thermalF);
+        if (mod.thermalF !== 0) {
+          els.wxTemp.textContent = adjF;
+          els.wxTempAdj.textContent = `${signed(Math.round(mod.thermalF))}°F micro-climate buffer (station: ${baseF}°F)`;
+        } else {
+          els.wxTemp.textContent = baseF;
+          els.wxTempAdj.textContent = '';
+        }
+
+        els.wxWind.textContent = (c.wind_speed_10m ?? 0).toFixed(1);
+        els.wxPrecip.textContent = (c.precipitation ?? 0).toFixed(2);
+        els.wxHumid.textContent = c.relative_humidity_2m ?? '—';
+
+        els.wxWindNote.textContent = (c.wind_speed_10m ?? 0) > 15 ? '🌬️ breezy' : (c.wind_speed_10m ?? 0) > 8 ? '🍃 light breeze' : '🌳 calm';
+        els.wxPrecipNote.textContent = (c.precipitation ?? 0) > 0.05 ? '🌧️ currently wet' : '☀️ dry at the moment';
+
+        // Combined weather badge (priority: emergency, wind, rain shadow)
+        if (mod.weatherFlags.length) {
+          const top = mod.weatherFlags[0];
+          els.wxBadge.className = `mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${badgeTone(top.tone)}`;
+          els.wxBadge.innerHTML = `<span>${top.emoji}</span><span>${top.text}</span>`;
+          els.wxBadge.classList.remove('hidden');
+        } else {
+          els.wxBadge.classList.add('hidden');
+        }
+
+        els.liveLabel.textContent = g ? `Live · ${g.name}` : 'Awaiting location…';
+      } else {
+        els.wxCity.textContent = '—';
+        els.wxCoords.textContent = 'Click “Update Location” to pull live data.';
+        els.wxIcon.textContent = '🌱';
+        els.wxUpdated.textContent = 'No fetch yet';
+        els.wxTemp.textContent = '—';
+        els.wxTempAdj.textContent = '';
+        els.wxWind.textContent = '—';
+        els.wxWindNote.textContent = '';
+        els.wxPrecip.textContent = '—';
+        els.wxPrecipNote.textContent = '';
+        els.wxHumid.textContent = '—';
+        els.wxBadge.classList.add('hidden');
+        els.liveLabel.textContent = 'Awaiting location…';
+      }
+
+      // --- Scorecard ---
+      els.scoreList.innerHTML = mod.scoreChips.map(chip => `
+        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${chipTone(chip.tone)}">
+          <span>${chip.emoji}</span>
+          <span>${chip.label}</span>
+          ${chip.sub ? `<span class="opacity-70">· ${chip.sub}</span>` : ''}
+        </span>
+      `).join('') || `<span class="text-xs text-bark-600">Pick your topography to begin.</span>`;
+
+      // --- Adjusted frost anchors ---
+      const lastAdj  = addDays(BASELINE.lastSpringFrost,  mod.springShift);
+      const firstAdj = addDays(BASELINE.firstAutumnFrost, mod.autumnShift);
+      els.lastFrostAdj.textContent  = fmtDate(lastAdj);
+      els.firstFrostAdj.textContent = fmtDate(firstAdj);
+      els.lastFrostDelta.textContent  = mod.springShift ? `${signed(mod.springShift)} day${Math.abs(mod.springShift)>1?'s':''} vs. Apr 25` : 'No change · Apr 25';
+      els.firstFrostDelta.textContent = mod.autumnShift ? `${signed(mod.autumnShift)} day${Math.abs(mod.autumnShift)>1?'s':''} vs. Oct 15` : 'No change · Oct 15';
+
+      // --- Alerts feed ---
+      els.alertList.innerHTML = mod.alerts.length
+        ? mod.alerts.map(a => `
+            <li class="flex gap-3 p-3.5 rounded-xl border ${alertBorder(a.tone)} ${alertBg(a.tone)} animate-fade-up">
+              <div class="text-2xl leading-none">${a.icon}</div>
+              <div class="min-w-0">
+                <p class="font-semibold text-bark-900 text-sm">${a.title}</p>
+                <p class="text-sm text-bark-800 mt-0.5 leading-relaxed">${a.body}</p>
+              </div>
+            </li>
+          `).join('')
+        : `<li class="text-sm text-bark-600 italic p-3 rounded-xl bg-bark-50">🌿 No alerts — your configuration looks balanced. Plant with confidence.</li>`;
+      els.alertCount.textContent = `${mod.alerts.length} alert${mod.alerts.length===1?'':'s'}`;
+      els.alertCount.className = `text-[11px] px-2.5 py-1 rounded-full font-medium ${mod.alerts.length ? 'bg-clay-100 text-clay-700' : 'bg-bark-100 text-bark-800'}`;
+
+      // --- Planting table ---
+      els.plantTable.innerHTML = CROPS.map(c => {
+        const baseline = baselineDateFor(c);
+        const adjusted = adjustDateFor(c, mod, baseline);
+        const deltaDays = Math.round((adjusted - baseline) / (1000*60*60*24));
+        const shiftLabel = deltaDays === 0
+          ? `<span class="text-bark-600">no shift</span>`
+          : `<span class="${deltaDays>0 ? 'text-clay-700' : 'text-moss-700'} font-medium">${signed(deltaDays)} day${Math.abs(deltaDays)>1?'s':''}</span>`;
+        const kindLabel = c.kind === 'warm' ? '🔥 Warm-season'
+                       : c.kind === 'cool-spring' ? '❄️ Cool-spring'
+                       : c.kind === 'cool-fall' ? '🍂 Fall-planted' : c.kind;
+        return `
+          <tr class="border-b border-bark-100/70 hover:bg-bark-50/40 transition">
+            <td class="py-3 pr-4">
+              <span class="text-xl mr-2">${c.emoji}</span>
+              <span class="font-medium text-bark-900">${c.name}</span>
+            </td>
+            <td class="py-3 pr-4 text-xs text-bark-700">${kindLabel}</td>
+            <td class="py-3 pr-4 text-bark-800">${fmtDate(baseline)}</td>
+            <td class="py-3 pr-4 font-medium ${adjustedStyles(adjusted, c)}">${fmtDateLong(adjusted)}</td>
+            <td class="py-3 pr-4">${shiftLabel}</td>
+            <td class="py-3 text-xs text-bark-600 max-w-[260px]">${c.note}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Comp helpers
+    function baselineDateFor(c) {
+      if (c.kind === 'cool-fall') return addDays(BASELINE.firstAutumnFrost, c.offset);
+      // warm and cool-spring anchor on last spring frost
+      return addDays(BASELINE.lastSpringFrost, c.offset);
+    }
+    function adjustDateFor(c, mod, baseline) {
+      let out = baseline;
+      if (c.kind === 'warm')           out = addDays(baseline, mod.springShift + mod.soilDelay);
+      else if (c.kind === 'cool-spring') out = addDays(baseline, mod.springShift);
+      else if (c.kind === 'cool-fall')   out = addDays(baseline, mod.autumnShift);
+      return out;
+    }
+    function adjustedStyles(d, c) {
+      const today = new Date();
+      const month = (new Date().getMonth() + 1) + '/' + new Date().getDate();
+      if (d < today) return 'text-clay-700';
+      if (d.getMonth() === 3 && d.getDate() <= 30 && c.kind === 'warm') return 'text-moss-700';
+      return 'text-bark-900';
+    }
+
+    // ----- Color helpers -----
+    function chipTone(tone) {
+      return {
+        warm:   'bg-clay-100 text-clay-700 border border-clay-400/40',
+        cool:   'bg-blue-50 text-blue-700 border border-blue-200',
+        mild:   'bg-moss-100 text-moss-700 border border-moss-400/30',
+        neutral:'bg-bark-100 text-bark-800 border border-bark-200',
+      }[tone] || 'bg-bark-100 text-bark-800 border border-bark-200';
+    }
+    function badgeTone(tone) {
+      return {
+        warn:      'bg-clay-100 text-clay-700 border border-clay-400/40',
+        cool:      'bg-blue-50 text-blue-700 border border-blue-200',
+        emergency: 'bg-red-100 text-red-700 border border-red-300 animate-pulse-soft',
+      }[tone] || 'bg-bark-100 text-bark-800 border border-bark-200';
+    }
+    function alertBorder(tone) {
+      return {
+        emergency:'border-red-300',
+        alert:    'border-clay-300',
+        warn:     'border-clay-200',
+        cool:     'border-blue-200',
+        warm:     'border-clay-300',
+        mild:     'border-moss-200',
+      }[tone] || 'border-bark-200';
+    }
+    function alertBg(tone) {
+      return {
+        emergency:'bg-red-50',
+        alert:    'bg-clay-50',
+        warn:     'bg-clay-50/70',
+        cool:     'bg-blue-50',
+        warm:     'bg-clay-50/70',
+        mild:     'bg-moss-50',
+      }[tone] || 'bg-bark-50';
+    }
+
+    /* ============================================================
+       Event wiring
+       ============================================================ */
+    els.updateLocBtn.addEventListener('click', () => refreshLocation(els.locInput.value));
+    els.calculateBtn.addEventListener('click', () => {
+      if (!state.weather) {
+        refreshLocation(els.locInput.value);
+      } else {
+        // re-render with new modifiers
+        render();
+        setStatus(`✓ Recomputed for ${state.geo?.name || 'this yard'}`, 'ok');
+      }
+    });
+    [els.topography, els.infrastructure, els.soil].forEach(sel => {
+      sel.addEventListener('change', () => {
+        state[sel.id] = sel.value;
+        render();
+      });
+    });
+    els.locInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') refreshLocation(els.locInput.value);
+    });
+
+    /* ============================================================
+       Initial render · kick off default fetch
+       ============================================================ */
+    render();
+    refreshLocation(els.locInput.value);
+  </script>
+</body>
+</html>
