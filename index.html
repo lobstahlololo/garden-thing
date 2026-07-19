@@ -6,8 +6,8 @@
   <title>MicroGrow · Hyper-Local Garden Planner</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script src="wildlife.js" defer></script>
   <script>
     tailwind.config = {
       theme: {
@@ -89,6 +89,14 @@
       background-repeat: no-repeat;
       background-position: right .75rem center;
       background-size: 14px;
+    }
+    .threat-bar {
+      background: linear-gradient(90deg,
+        #7aa355 0%,
+        #d99669 25%,
+        #c87b46 45%,
+        #a8612f 70%,
+        #8a2a1f 100%);
     }
   </style>
 </head>
@@ -297,6 +305,33 @@
           </article>
         </div>
 
+        <!-- Wildlife risks card -->
+        <article id="wildlifeCard" class="relative bg-white border border-bark-100 rounded-2xl shadow-soil p-6 overflow-hidden">
+          <div class="flex items-start justify-between gap-4">
+            <div class="min-w-0">
+              <p class="text-[11px] uppercase tracking-wider text-bark-600 font-medium">Local Wildlife Risks</p>
+              <h3 id="wildlifeHeadline" class="display text-2xl font-semibold text-bark-900 mt-0.5">Awaiting observations…</h3>
+              <p id="wildlifeSummary" class="text-xs text-bark-600 mt-1 max-w-prose">iNaturalist observations within 25 mi, last 90 days, cross-checked against a curated global garden-pest list.</p>
+            </div>
+            <div class="text-right shrink-0">
+              <p class="display text-4xl font-semibold text-bark-900 leading-none"><span id="wildlifeCount">—</span></p>
+              <p class="text-[11px] text-bark-600 mt-1 uppercase tracking-wider">Recent records</p>
+              <p id="wildlifeRiskBadge" class="hidden text-[11px] mt-2 px-2.5 py-1 rounded-full inline-block font-medium"></p>
+            </div>
+          </div>
+          <div class="mt-5">
+            <div class="flex items-center gap-3 text-[11px] text-bark-600">
+              <span>Quiet</span>
+              <div class="threat-bar h-2 flex-1 rounded-full overflow-hidden"></div>
+              <span>Active</span>
+            </div>
+            <div class="text-[10px] uppercase tracking-wider text-bark-600 mt-1.5 font-medium">Wildlife pressure - severity x recent observation count.</div>
+          </div>
+          <div id="wildlifeThreats" class="mt-4 space-y-3"></div>
+          <div id="wildlifeBeneficials" class="mt-4"></div>
+          <p id="wildlifeFootnote" class="text-[11px] text-bark-600 mt-3 max-w-prose"></p>
+        </article>
+
         <!-- Alerts feed -->
         <article class="bg-white border border-bark-100 rounded-2xl shadow-soil p-6">
           <div class="flex items-center justify-between gap-3 flex-wrap">
@@ -338,7 +373,7 @@
         </article>
 
         <p class="text-[11px] text-bark-600 text-center pt-2">
-          Weather data · <a class="underline hover:text-moss-700" href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> · Baseline frost dates are regional heuristics, tune them to your 10-year USDA/NWS average.
+          Weather data · <a class="underline hover:text-moss-700" href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> · Wildlife observations · <a class="underline hover:text-moss-700" href="https://www.inaturalist.org/" target="_blank" rel="noopener">iNaturalist</a> · Baseline frost dates are regional heuristics, tune them to your 10-year USDA/NWS average.
         </p>
       </section>
     </div>
@@ -399,6 +434,150 @@
       95:'Thunderstorm', 96:'Thunderstorm + hail', 99:'Severe thunderstorm',
     };
 
+    /* Curated global garden-pressure knowledge base.
+       Matches iNaturalist scientific names (region-agnostic: where iNaturalist has
+       observations, this list surfaces them). rank:'genus' = prefix match;
+       rank:'species' = exact match (used when a genus mixes friends and foes). */
+    const NUSIANCE_SPECIES = {
+      // ===== CRITICAL =====
+      'Odocoileus': { rank:'genus', common:'White-tailed deer', emoji:'🦌', severity:'critical',
+        summary:'Voracious browsers that can clear a garden in a night.',
+        fixes:['8-ft perimeter fence (or 4+4 staggered double-fence)', 'Deer-resistant plant choices (daffodils, lavender, sage)', 'Egg-based repellents, refresh weekly', 'Motion-activated sprinklers along approach paths'] },
+      'Sus scrofa': { rank:'species', common:'Wild boar', emoji:'🐗', severity:'critical',
+        summary:'Rototills whole raised beds in minutes; aggressive when with piglets.',
+        fixes:['Buried heavy-gauge mesh under beds', 'Electric fencing around perimeter', 'Remove attractants (fallen fruit, open compost)'] },
+      'Trichosurus': { rank:'genus', common:'Brushtail possum', emoji:'🌑', severity:'critical',
+        summary:'Agile climber; strips fruit trees bare overnight (AU/NZ).',
+        fixes:['Trunk collars (sheet metal or smooth PVC)', 'Netting canopies over fruit trees', 'Quash or capsaicin deterrent sprays on new shoots'] },
+      'Ursus': { rank:'genus', common:'Bears (black/brown/sun)', emoji:'🐻', severity:'critical',
+        summary:'Suburban damage: compost, apiaries, bird feeders, fruit trees.',
+        fixes:['Bear-resistant trash cans or store indoors overnight', 'Remove bird feeders spring-fall', 'Electric fence for apiaries', 'Pick fruit before it fully ripens'] },
+      'Microtus': { rank:'genus', common:'Voles', emoji:'🐭', severity:'critical',
+        summary:'Girdle bark at the soil line, kill trees over winter.',
+        fixes:['½” hardware-cloth trunk cylinders (3 ft tall)', 'Keep mulch ≤2″ deep and 12″ from trunks', '3-ft vegetation-free zone around bases'] },
+      // ===== HIGH =====
+      'Capreolus': { rank:'genus', common:'Roe deer', emoji:'🦌', severity:'high',
+        summary:'Adept jumpers; common in EU / Asian suburbs.',
+        fixes:['6-ft perimeter fence (or 4+4 staggered)', 'Tall cylindrical tree guards', 'Reapply scent repellents after rain'] },
+      'Muntiacus': { rank:'genus', common:'Muntjac deer', emoji:'🦌', severity:'high',
+        summary:'Smaller Asiatic deer now established across UK suburbs.',
+        fixes:['5-ft fence (muntjac rarely jump higher)', 'Close gaps under sheds and gates', 'Hot-pepper + garlic spray on ornamentals'] },
+      'Cervus': { rank:'genus', common:'Red deer / wapiti / sika', emoji:'🦌', severity:'high',
+        summary:'Larger browsing damage than roe; rut-rub bark in autumn.',
+        fixes:['7-ft perimeter fence', 'Tree guards on all saplings', 'Avoid planting near known rut routes'] },
+      'Dama': { rank:'genus', common:'Fallow deer', emoji:'🦌', severity:'high',
+        summary:'Widely introduced; herd damage common in parks and large gardens.',
+        fixes:['7-ft perimeter fence', 'Plant harder-to-browse species near fence', 'Coordinate herd deterrence with neighbors'] },
+      'Oryctolagus': { rank:'genus', common:'European rabbit', emoji:'🐇', severity:'high',
+        summary:'Massive global pest; population explodes in dry climates.',
+        fixes:['Chicken wire buried 6″ with 4″ upward lip', 'Warrens dismantled by hand or fumigation (check regs)', 'Exclusion fencing preferred over population control'] },
+      'Sylvilagus': { rank:'genus', common:'Cottontail rabbit', emoji:'🐰', severity:'high',
+        summary:'Nibbles seedlings, lettuce, beans, tender bark.',
+        fixes:['2-foot chicken-wire fence with 6″ buried lip', 'Raised beds 24″+ tall with closed bottoms', 'Hot-pepper or predator-urine spray, refresh after rain'] },
+      'Lepus': { rank:'genus', common:'Hares / jackrabbits', emoji:'🐇', severity:'high',
+        summary:'Larger bite than rabbits; can clear rows overnight.',
+        fixes:['3-ft wire fence', 'Plant sacrificial buffer rows of clover', 'Scare owls (move weekly to avoid habituation)'] },
+      'Marmota': { rank:'genus', common:'Marmots / groundhogs', emoji:'🦫', severity:'high',
+        summary:'Voracious herbaceous eaters; burrow under shallow fences.',
+        fixes:['L-shaped buried wire (3-ft above + 1-ft below)', 'Bury hardware cloth beneath raised beds', 'Live traps then on-site dispatch (relocation across property lines is illegal in many US states)'] },
+      'Sciurus': { rank:'genus', common:'Tree squirrels (gray / fox / red)', emoji:'🐿️', severity:'high',
+        summary:'Devastate near-ripe fruit, tomatoes, bulbs; bypass standard fences.',
+        fixes:['Hardware-cloth cages around fruit trees and tomato beds', 'Tree-trunk baffles for isolated trees', 'Pick fruit promptly; clear all windfalls'] },
+      'Procyon': { rank:'genus', common:'Raccoon', emoji:'🦝', severity:'high',
+        summary:'Clever with latches; raids sweet corn the night of picking.',
+        fixes:['Bungee or locks on bins', '¼” hardware-cloth roof over sweet corn patch', 'Pick corn same morning it ripens', 'Motion lights at night'] },
+      'Pieris rapae': { rank:'species', common:'Cabbage white butterfly', emoji:'🦋', severity:'high',
+        summary:'Caterpillars skeletonize brassicas within days.',
+        fixes:['Floating row cover over brassicas from transplant', 'Hand-pick green caterpillars weekly', 'Btk (Bt kurstaki) spray for heavy pressure'] },
+      'Popillia japonica': { rank:'species', common:'Japanese beetle', emoji:'🪲', severity:'high',
+        summary:'Skeletonizes 300+ species, worst in eastern US.',
+        fixes:['Hand-pick into soapy water at dawn', 'Milky spore on lawn over 2–3 years', 'Floating row cover in June', 'Skip pheromone traps near garden'] },
+      'Lycorma delicatula': { rank:'species', common:'Spotted lanternfly', emoji:'🪲', severity:'high',
+        summary:'Invasive sap-sucker; sooty mold on grapes, hops, tree-of-heaven.',
+        fixes:['Stomp every adult/nymph on sight', 'Sticky-band tree wraps on host trees', 'Squash egg masses (mud-tube like)', 'Report sightings to local ag department'] },
+      'Rattus': { rank:'genus', common:'Rats (Norway / roof)', emoji:'🐀', severity:'high',
+        summary:'Steal seed/grain/feed; chew wiring in sheds.',
+        fixes:['Snap traps with peanut butter along walls', 'Store feed and seed in metal bins', 'Remove ivy and brush piles that harbor burrows'] },
+      // ===== MEDIUM =====
+      'Talpa': { rank:'genus', common:'European mole', emoji:'🦔', severity:'medium',
+        summary:'Insectivore (worms/grubs), not plants. Root heaving damage.',
+        fixes:['Castor-oil-based repellent', 'Scissor/harpoon traps on active runs', 'Lawn-roller compaction of fresh runs'] },
+      'Scalopus aquaticus': { rank:'species', common:'Eastern mole', emoji:'🦔', severity:'medium',
+        summary:'Insectivore; mostly cosmetic tunneling.',
+        fixes:['Reduce grub population with milky spore', 'Castor-oil repellent', 'Scissor traps on active runs'] },
+      'Tamias': { rank:'genus', common:'Chipmunks', emoji:'🐿️', severity:'medium',
+        summary:'Steal seeds; dig up freshly planted starts.',
+        fixes:['Live traps with peanut butter (check local regs)', 'Seal gaps under porches with hardware cloth', 'Pre-sprout pea/bean seeds indoors'] },
+      'Spermophilus': { rank:'genus', common:'Ground squirrels', emoji:'🐿️', severity:'medium',
+        summary:'Burrow in beds; graze seedlings in colonies.',
+        fixes:['L-shaped buried wire', 'Trap-and-relocate (check local laws)'] },
+      'Corvus': { rank:'genus', common:'Crows / ravens', emoji:'🐦', severity:'medium',
+        summary:'Pull up corn seedlings, raid berries, steal fruit.',
+        fixes:['Netting over ripening corn/berries', 'Mylar tape or pinwheels', 'Scarecrow with movable parts (rotate weekly)'] },
+      'Pica': { rank:'genus', common:'Magpies', emoji:'🐦', severity:'medium',
+        summary:'Steal fruit and eggs of ground-nesting songbirds.',
+        fixes:['Netting over vulnerable crops', 'Visual deterrents'] },
+      'Sturnus': { rank:'genus', common:'Starlings / mynas', emoji:'🐦', severity:'medium',
+        summary:'Flock damage on cherries, figs, grapes.',
+        fixes:['Netting over fruit trees during ripening', 'Bird scarers with delay timers'] },
+      'Columba': { rank:'genus', common:'Pigeons / doves', emoji:'🐕', severity:'medium',
+        summary:'Eat seedlings, brassicas, peas.',
+        fixes:['Netting over vulnerable beds', 'Visual deterrents plus decoys'] },
+      'Passer': { rank:'genus', common:'House sparrows', emoji:'🐦', severity:'medium',
+        summary:'Strip seedlings, raid soft fruit in colonies.',
+        fixes:['Netting; denser plant cover reduces damage'] },
+      'Meleagris gallopavo': { rank:'species', common:'Wild turkey', emoji:'🦃', severity:'medium',
+        summary:'Flocks scrape beds clean; can be aggressive in spring.',
+        fixes:['Heavy 2″ mesh netting', 'Motion-activated sprinklers', 'A leashed dog on regular patrol'] },
+      'Branta canadensis': { rank:'genus', common:'Canada goose', emoji:'🦢', severity:'medium',
+        summary:'Heavy droppings on lawn; aggressive around goslings.',
+        fixes:['Let grass grow tall', 'Wire fence 18″ around prized lawn patches'] },
+      'Arion': { rank:'genus', common:'Slugs (large black)', emoji:'🐌', severity:'medium',
+        summary:'Major seedling destroyers in damp climates.',
+        fixes:['Copper tape around beds', 'Iron-phosphate pellets (pet-safe)', 'Night hand-picking', 'Beer traps'] },
+      'Limax': { rank:'genus', common:'Slugs (field/grey)', emoji:'🐌', severity:'medium',
+        summary:'Same impact as Arion; often coexist.',
+        fixes:['Same as Arion: copper, hand-picking, iron pellets'] },
+      // ===== LOW =====
+      'Didelphis': { rank:'genus', common:'Opossums', emoji:'🐀', severity:'low',
+        summary:'Mostly beneficial - eats ticks, slugs, rodents. Takes pet food.',
+        fixes:['Bring pet food inside at dusk', 'Pick up ripe fruit daily so windfalls do not attract them'] },
+      'Vulpes': { rank:'genus', common:'Foxes', emoji:'🦊', severity:'low',
+        summary:'Predator of rodents - mostly an ally; takes eggs or chicks if present.',
+        fixes:['Secure poultry housing at night', 'Otherwise leave them be'] },
+      // ===== BENEFICIAL =====
+      'Erinaceus': { rank:'genus', common:'Hedgehogs', emoji:'🦔', severity:'beneficial',
+        summary:'Slug-and-snail specialists; beloved EU garden ally.',
+        fixes:['Leave gaps under fences for passage', 'Avoid metaldehyde slug pellets (poison hedgehogs)', 'Provide shallow water dish'] },
+      'Apis': { rank:'genus', common:'Honey bees', emoji:'🐝', severity:'beneficial',
+        summary:'Primary pollinator of fruit, vegetables, cover crops.',
+        fixes:['Plant continuous bloom spring-to-fall', 'Avoid spraying open blooms; spray at dusk'] },
+      'Bombus': { rank:'genus', common:'Bumble bees', emoji:'🐝', severity:'beneficial',
+        summary:'Best pollinator of tomatoes, blueberries, buzz-pollinated crops.',
+        fixes:['Leave bare soil for ground-nesting species', 'Plant early-spring native flowers (willow, crocus)'] },
+      'Anaxyrus': { rank:'genus', common:'Toads', emoji:'🐸', severity:'beneficial',
+        summary:'Eats hundreds of slugs, beetles, cutworms nightly.',
+        fixes:['Shallow water dish with pebbles for easy exit', 'Broken clay pot against a rock as shelter'] },
+      'Thamnophis': { rank:'genus', common:'Garter snakes', emoji:'🐍', severity:'beneficial',
+        summary:'Eats slugs, grubs, mice, voles. Completely harmless.',
+        fixes:['Leave flat rocks and stone walls undisturbed', 'Avoid broad-spectrum pesticides that kill slugs snakes eat'] },
+      'Pipistrellus': { rank:'genus', common:'Pipistrelle bats', emoji:'🦇', severity:'beneficial',
+        summary:'Eats 3000 insects per night including cutworm moths.',
+        fixes:['Install bat house 12–20 ft up on south-facing wall'] },
+      'Eptesicus': { rank:'genus', common:'Big brown bats', emoji:'🦇', severity:'beneficial',
+        summary:'Same benefits as pipistrelle - excellent nocturnal pest control.',
+        fixes:['Same: bat house on south wall, skip outdoor bug zappers'] },
+      'Coccinella': { rank:'genus', common:'Ladybird beetles', emoji:'🐞', severity:'beneficial',
+        summary:'Aphid specialists; one larva eats 5000+ aphids.',
+        fixes:['Avoid broad-spectrum insecticides', 'Plant pollen-rich flowers (dill, fennel, alyssum)'] },
+      'Chrysoperla': { rank:'genus', common:'Green lacewings', emoji:'🦋', severity:'beneficial',
+        summary:'Larvae eat aphids, mites, thrips, mealybugs.',
+        fixes:['Same: skip broad-spectrum insecticides, plant pollen sources'] },
+      'Strix': { rank:'genus', common:'Owls', emoji:'🦉', severity:'beneficial',
+        summary:'Vole, mouse, and rat hunters — installable via nest box.',
+        fixes:['Install barn-owl / screech-owl box on pole 15+ ft up'] },
+    };
+
     /* ---------- App state ---------- */
     const state = {
       topography: 'flat',
@@ -408,6 +587,8 @@
       weather: null,    // current weather payload
       loading: false,
       lastFetchAt: null,
+      wildlife: null,
+      wildlifeErr: null,
     };
 
     /* ---------- DOM references ---------- */
@@ -436,7 +617,22 @@
       alertList: $('alertList'),
       alertCount: $('alertCount'),
       plantTable: $('plantTable'),
+      wildlifeHeadline: $('wildlifeHeadline'),
+      wildlifeSummary: $('wildlifeSummary'),
+      wildlifeCount: $('wildlifeCount'),
+      wildlifeRiskBadge: $('wildlifeRiskBadge'),
+      wildlifeThreats: $('wildlifeThreats'),
+      wildlifeBeneficials: $('wildlifeBeneficials'),
+      wildlifeFootnote: $('wildlifeFootnote'),
     };
+
+    /* Expose globals for the wildlife.js monkey-patches.
+       `const`/`let` top-level bindings are not on `window`, but wildlife.js
+       reads them through `window.X`. Without this, the patch throws and
+       the wildlife card stays at "Awaiting observations…". */
+    window.state = state;
+    window.els = els;
+    window.NUSIANCE_SPECIES = NUSIANCE_SPECIES;
 
     /* ---------- Helpers ---------- */
     const fmtDate = (d) => d.toLocaleDateString(undefined, { month:'short', day:'numeric' });
@@ -509,6 +705,60 @@
       return await res.json();
     }
 
+    /* iNaturalist observatory: free, no API key, returns biodiversity observations
+       within a radius. We tally matches against our curated knowledge map. */
+    async function fetchWildlife(lat, lon) {
+      const d1 = new Date(); d1.setDate(d1.getDate() - 90);
+      const pad = (n) => String(n).padStart(2, '0');
+      const d1str = `${d1.getFullYear()}-${pad(d1.getMonth()+1)}-${pad(d1.getDate())}`;
+      const url = `https://api.inaturalist.org/v1/observations?lat=${lat}&lng=${lon}`
+        + `&radius=25&quality_grade=research,needs_id,casual`
+        + `&per_page=200&order=desc&order_by=created_at&d1=${d1str}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Wildlife service unavailable');
+      const data = await res.json();
+      if (!data || !Array.isArray(data.results)) throw new Error('No wildlife data for this location');
+      const tallies = Object.create(null);
+      let total = 0;
+      for (const obs of data.results) {
+        const sci = ((obs.taxon || {}).name || '').toLowerCase();
+        if (!sci) continue;
+        total++;
+        for (const key of Object.keys(NUSIANCE_SPECIES)) {
+          const spec = NUSIANCE_SPECIES[key];
+          const match = spec.rank === 'genus'
+            ? sci.startsWith(key.toLowerCase() + ' ')
+            : sci === key.toLowerCase();
+          if (match) tallies[key] = (tallies[key] || 0) + 1;
+        }
+      }
+      return { tallies, total, fetched: data.results.length, windowStart: d1str };
+    }
+
+    function classifyWildlife(tallies) {
+      const threats = [];
+      const beneficials = [];
+      let totalNuisanceObs = 0;
+      let weightedPressure = 0;
+      for (const [key, count] of Object.entries(tallies)) {
+        const spec = NUSIANCE_SPECIES[key];
+        if (!spec || count <= 0) continue;
+        const enriched = { key, count, ...spec };
+        if (spec.severity === 'beneficial') beneficials.push(enriched);
+        else {
+          threats.push(enriched);
+          totalNuisanceObs += count;
+          const sevWeight = { critical:1.0, high:0.7, medium:0.4, low:0.15 }[spec.severity] || 0.3;
+          weightedPressure += sevWeight * Math.log2(1 + count);
+        }
+      }
+      const SEV_ORDER = { critical:0, high:1, medium:2, low:3 };
+      threats.sort((a, b) => (SEV_ORDER[a.severity] - SEV_ORDER[b.severity]) || (b.count - a.count));
+      beneficials.sort((a, b) => b.count - a.count);
+      const pressureIndex = Math.min(1, weightedPressure / 6);
+      return { threats, beneficials, totalNuisanceObs, pressureIndex };
+    }
+
     async function refreshLocation(rawName) {
       const query = (rawName || '').trim();
       if (!query) { setStatus('⚠️ Enter a city or ZIP code.', 'warn'); return; }
@@ -520,9 +770,15 @@
         const geo = await geocode(query);
         state.geo = geo;
         setStatus('🌤 Pulling live forecast…', 'info');
-        const wx = await fetchWeather(geo.latitude, geo.longitude);
-        state.weather = wx;
+        const [wxR, wildlifeR] = await Promise.allSettled([
+          fetchWeather(geo.latitude, geo.longitude),
+          fetchWildlife(geo.latitude, geo.longitude),
+        ]);
+        if (wxR.status === 'rejected') throw new Error(wxR.reason?.message || 'Weather service unavailable');
+        state.weather = wxR.value;
         state.lastFetchAt = new Date();
+        if (wildlifeR.status === 'fulfilled') { state.wildlife = wildlifeR.value; state.wildlifeErr = null; }
+        else { state.wildlife = null; state.wildlifeErr = wildlifeR.reason?.message || 'Unavailable'; console.warn('Wildlife fetch failed:', wildlifeR.reason); }
         setStatus(`✓ ${geo.name}${geo.admin1 ? ', ' + geo.admin1 : ''}${geo.country ? ' · ' + geo.country : ''}`, 'ok');
         render();
       } catch (err) {
