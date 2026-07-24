@@ -6,97 +6,236 @@
   <title>MicroGrow · Hyper-Local Garden Planner</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
-    <script src="wildlife.js" defer></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+  <script src="wildlife.js" defer></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Inter','system-ui','sans-serif'],
+            sans:    ['Geist','system-ui','sans-serif'],
             display: ['Fraunces','Georgia','serif'],
+            mono:    ['"JetBrains Mono"','ui-monospace','monospace'],
           },
           colors: {
-            bark: {
-              50:  '#faf7f2',
-              100: '#f1ead9',
-              200: '#e2d4b6',
-              400: '#a8916a',
-              600: '#6e5a35',
-              800: '#3f3320',
-              900: '#241d12',
-            },
-            moss: {
-              50:  '#f3f7ef',
-              100: '#e6eedb',
-              400: '#9bbb7b',
-              500: '#7aa355',
-              600: '#5e8540',
-              700: '#4a6a32',
-              800: '#385128',
-              900: '#243718',
-            },
-            clay: {
-              400: '#d99669',
-              500: '#c87b46',
-              600: '#a8612f',
-              700: '#874b22',
-            },
+            // Botanical Field Journal palette
+            bark: { 50:'#F4F1E6', 100:'#E8E2CE', 200:'#D9D0B6',
+                    400:'#A89370', 600:'#6B5530', 800:'#3D3320', 900:'#172B1E' },
+            moss: { 50:'#EEF1E8', 100:'#DEE8D3', 200:'#C7D9B7',
+                    400:'#9DB97D', 500:'#5B8245', 600:'#4A7039',
+                    700:'#2D5739', 800:'#1F3D2B', 900:'#152918' },
+            clay: { 400:'#E2945A', 500:'#C76B3F', 600:'#A8522B', 700:'#7A3A1B' },
+            bad:  { 400:'#C44A3D', 500:'#A1271B', 600:'#7E1A12' },
+            frost:{ 300:'#7DA8C0', 500:'#3F6E89', 700:'#23485D' },
           },
           boxShadow: {
-            leaf: '0 10px 30px -12px rgba(36, 71, 24, 0.25)',
-            soil: '0 6px 24px -10px rgba(63, 51, 32, 0.35)',
+            leaf: '0 10px 30px -12px rgba(31,61,43,.32)',
+            soil: '0 6px 24px -10px rgba(23,43,30,.35)',
+            ink:  '0 1px 0 rgba(23,43,30,.04), 0 12px 32px -16px rgba(23,43,30,.18)',
+            seal: '0 0 0 4px rgba(200,68,42,.18)',
           },
           animation: {
-            'pulse-soft': 'pulseSoft 2.2s cubic-bezier(0.4,0,0.6,1) infinite',
-            'fade-up': 'fadeUp .35s ease-out both',
+            'pulse-soft':   'pulseSoft 2.4s cubic-bezier(.4,0,.6,1) infinite',
+            'fade-up':      'enterUp .55s cubic-bezier(.2,.7,.2,1) both',
+            'enter-up':     'enterUp .55s cubic-bezier(.2,.7,.2,1) both',
+            'slide-in-left':'slideInLeft .32s cubic-bezier(.2,.7,.2,1) both',
+            'push-in':      'pushIn .36s cubic-bezier(.2,.7,.2,1) both',
+            'slow-drift':   'slowDrift 22s ease-in-out infinite alternate',
           },
           keyframes: {
             pulseSoft: {
-              '0%,100%': { boxShadow: '0 0 0 0 rgba(217,150,105,0.6)' },
-              '50%':     { boxShadow: '0 0 0 12px rgba(217,150,105,0)' },
+              '0%,100%': { boxShadow: '0 0 0 0 rgba(200,68,42,.55)' },
+              '50%':     { boxShadow: '0 0 0 12px rgba(200,68,42,0)' },
             },
-            fadeUp: {
-              '0%':   { opacity: 0, transform: 'translateY(6px)' },
-              '100%': { opacity: 1, transform: 'translateY(0)' },
+            enterUp: {
+              '0%':   { opacity: 0, transform: 'translateY(8px) scale(.985)' },
+              '100%': { opacity: 1, transform: 'translateY(0)   scale(1)' },
+            },
+            slideInLeft: {
+              '0%':   { opacity: 0, transform: 'translateX(-12px)' },
+              '100%': { opacity: 1, transform: 'translateX(0)' },
+            },
+            pushIn: {
+              '0%':   { opacity: 0, transform: 'translateX(-10px) scale(.98)' },
+              '60%':  { opacity: 1, transform: 'translateX(2px)   scale(1.01)' },
+              '100%': { opacity: 1, transform: 'translateX(0)     scale(1)' },
+            },
+            slowDrift: {
+              '0%':   { backgroundPosition: '0% 0%,   100% 0%,  50% 100%', filter: 'hue-rotate(0deg)' },
+              '100%': { backgroundPosition: '4% 6%,   96% 8%,   48% 92%',  filter: 'hue-rotate(6deg)' },
             },
           },
         },
       },
     };
-  </script>
-  <style>
-    html, body { background: #faf7f2; }
-    body { font-family: 'Inter', system-ui, sans-serif; color: #241d12; }
-    .display { font-family: 'Fraunces', Georgia, serif; font-feature-settings: "ss01"; }
+  </script>  <style>
+    /* =========================================================
+       MicroGrow · design tokens
+       Theme: Botanical Field Journal with hanko accent
+       ========================================================= */
+    :root {
+      --canvas-1:#EEF1E8;   /* fog white-green */
+      --canvas-2:#F4F1E6;   /* paper warm */
+      --ink:     #172B1E;   /* body text 16.6:1 on canvas-1 */
+      --ink-2:   #6B5530;   /* secondary text */
+      --accent:  #C8442A;   /* hanko vermilion sharp accent */
+      --good:    #5B8245;
+      --warn:    #C76B3F;
+      --bad:     #A1271B;
+      --cool:    #3F6E89;
+    }
+
+    html, body {
+      background: linear-gradient(180deg, var(--canvas-1) 0%, var(--canvas-2) 100%);
+      background-attachment: fixed;
+    }
+    body { font-family: 'Geist', system-ui, sans-serif; color: var(--ink); }
+
+    .display { font-family: 'Fraunces', Georgia, serif; font-feature-settings: "ss01", "ss02"; }
+    .mono    { font-family: 'JetBrains Mono', ui-monospace, monospace; font-feature-settings: "tnum"; }
+    .ink     { color: var(--ink); }
+
+    /* ---- Atmospheric background layers ----
+       Stacked back-to-front:
+       1) Topographic SVG repeating tile (garden-plot survey feel)
+       2) Three radial washes (deep moss top-left, accent top-right, moss bottom)
+       3) Slow ambient drift of the radial positions (22s ease-in-out)
+    */
     .leaf-bg {
       background-image:
-        radial-gradient(circle at 12% 18%, rgba(122,163,85,.18) 0, transparent 38%),
-        radial-gradient(circle at 88% 8%,  rgba(217,150,105,.22) 0, transparent 35%),
-        radial-gradient(circle at 50% 100%, rgba(74,106,50,.10) 0, transparent 60%);
+        radial-gradient(circle at 8% 12%,  rgba(31,61,43,.10)  0, transparent 38%),
+        radial-gradient(circle at 92% 6%,   rgba(200,68,42,.07) 0, transparent 32%),
+        radial-gradient(circle at 50% 100%, rgba(31,61,43,.08)  0, transparent 60%),
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'><g fill='none' stroke='%231F3D2B' stroke-width='0.6' stroke-dasharray='2 5' opacity='0.16'><ellipse cx='120' cy='120' rx='40' ry='24'/><ellipse cx='120' cy='120' rx='75' ry='45'/><ellipse cx='120' cy='120' rx='115' ry='68'/><ellipse cx='120' cy='120' rx='160' ry='95'/></g></svg>");
+      background-repeat: no-repeat, no-repeat, no-repeat, repeat;
+      background-size: 100% 100%, 100% 100%, 100% 100%, 240px 240px;
+      animation: slowDrift 22s ease-in-out infinite alternate;
     }
+    /* Concentric topographic ridge highlight - tiny gold dots on each ring */
+    .leaf-bg::after {
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: -1;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'><g fill='%23C8442A' opacity='0.32'><circle cx='120' cy='120' r='1.1'/><circle cx='195' cy='138' r='0.8'/><circle cx='45'  cy='102' r='0.8'/></g></svg>");
+      background-repeat: repeat;
+      background-size: 240px 240px;
+    }
+
+    /* Header ink grain (subtle, ink-tinted) */
     .grain::before {
-      content: '';
-      position: absolute; inset: 0; pointer-events: none;
-      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.15  0 0 0 0 0.13  0 0 0 0 0.09  0 0 0 0.04 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-      opacity: .35; mix-blend-mode: multiply; border-radius: inherit;
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.09  0 0 0 0 0.17  0 0 0 0 0.12  0 0 0 0.06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+      opacity: .4; mix-blend-mode: multiply; border-radius: inherit;
     }
+    /* Topographic hairlines on the dark header for the journal-page moment */
+    .grain::after {
+      content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .22;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='180' viewBox='0 0 420 180'><g fill='none' stroke='%23F4F1E6' stroke-width='0.5' opacity='0.55'><path d='M0 60 Q105 30 210 60 T 420 60'/><path d='M0 100 Q105 70 210 100 T 420 100'/><path d='M0 140 Q105 110 210 140 T 420 140'/></g></svg>");
+      background-repeat: no-repeat; background-size: 100% 100%;
+    }
+
+    /* Quiet scrollbar */
     .scroll-quiet::-webkit-scrollbar { width: 8px; height: 8px; }
-    .scroll-quiet::-webkit-scrollbar-thumb { background: #e2d4b6; border-radius: 8px; }
-    .scroll-quiet::-webkit-scrollbar-thumb:hover { background: #a8916a; }
+    .scroll-quiet::-webkit-scrollbar-thumb { background: #D9D0B6; border-radius: 8px; }
+    .scroll-quiet::-webkit-scrollbar-thumb:hover { background: #6B5530; }
+
+    /* Select chevron - matcha ink */
     .select-leaf {
-      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 20 20' fill='%23385128'><path d='M5.516 7.548a.75.75 0 011.06.02L10 11.06l3.424-3.49a.75.75 0 111.08 1.04l-3.96 4.04a.75.75 0 01-1.08 0l-3.96-4.04a.75.75 0 01.012-1.06z'/></svg>");
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 20 20' fill='%231F3D2B'><path d='M5.516 7.548a.75.75 0 011.06.02L10 11.06l3.424-3.49a.75.75 0 111.08 1.04l-3.96 4.04a.75.75 0 01-1.08 0l-3.96-4.04a.75.75 0 01.012-1.06z'/></svg>");
       background-repeat: no-repeat;
       background-position: right .75rem center;
       background-size: 14px;
     }
+
+    /* Severity gradient (moss → clay → hanko → deep rust) */
     .threat-bar {
       background: linear-gradient(90deg,
-        #7aa355 0%,
-        #d99669 25%,
-        #c87b46 45%,
-        #a8612f 70%,
-        #8a2a1f 100%);
+        #5B8245 0%,
+        #E2945A 28%,
+        #C76B3F 52%,
+        #C8442A 76%,
+        #7A3A1B 100%);
+    }
+
+    /* Karuta card edge - thin warm rule used on dashboard cards */
+    .card-rule { box-shadow: inset 0 0 0 1px rgba(31,61,43,.06), 0 1px 0 rgba(23,43,30,.04), 0 12px 32px -16px rgba(23,43,30,.18); }
+
+    /* =========================================================
+       Motion · one orchestrated entrance + micro-interactions
+       ========================================================= */
+    .header-enter,
+    .enter-up,
+    .slide-in-left,
+    .push-in { opacity: 0; }
+    .header-enter  { animation: enterUp      .7s  cubic-bezier(.2,.7,.2,1) both; }
+    .enter-up      { animation: enterUp      .55s cubic-bezier(.2,.7,.2,1) both; }
+    .slide-in-left { animation: slideInLeft  .32s cubic-bezier(.2,.7,.2,1) both; }
+    .push-in       { animation: pushIn       .36s cubic-bezier(.2,.7,.2,1) both; }
+
+    /* Sidebar cascade (6 elements) + dashboard cascade (6 elements) */
+    .enter-cascade > *,
+    .enter-cascade-dash > * { opacity: 0; animation: enterUp .55s cubic-bezier(.2,.7,.2,1) both; }
+    .enter-cascade     > *:nth-child(1) { animation-delay: 110ms; }
+    .enter-cascade     > *:nth-child(2) { animation-delay: 170ms; }
+    .enter-cascade     > *:nth-child(3) { animation-delay: 230ms; }
+    .enter-cascade     > *:nth-child(4) { animation-delay: 290ms; }
+    .enter-cascade     > *:nth-child(5) { animation-delay: 350ms; }
+    .enter-cascade     > *:nth-child(6) { animation-delay: 410ms; }
+    .enter-cascade-dash> *:nth-child(1) { animation-delay: 220ms; }
+    .enter-cascade-dash> *:nth-child(2) { animation-delay: 300ms; }
+    .enter-cascade-dash> *:nth-child(3) { animation-delay: 380ms; }
+    .enter-cascade-dash> *:nth-child(4) { animation-delay: 460ms; }
+    .enter-cascade-dash> *:nth-child(5) { animation-delay: 540ms; }
+    .enter-cascade-dash> *:nth-child(6) { animation-delay: 620ms; }
+
+    /* ---- Micro-interactions ---- */
+    .card-lift { transition: transform .22s cubic-bezier(.2,.7,.2,1), box-shadow .22s cubic-bezier(.2,.7,.2,1); }
+    .card-lift:hover { transform: translateY(-2px); }
+
+    input:focus-visible,
+    select:focus-visible,
+    button:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(200,68,42,.18);
+      border-color: #1F3D2B;
+      transition: box-shadow .18s ease, border-color .18s ease;
+    }
+
+    /* Severity color helpers (so JS can use semantic class names) */
+    .tone-good { background: #DEE8D3; color: #2D5739; }
+    .tone-warn { background: #F7E1D2; color: #7A3A1B; }
+    .tone-bad  { background: #F2D1CB; color: #7E1A12; }
+    .tone-cool { background: #D8E3EC; color: #23485D; }
+    .tone-warm { background: #F2D8C5; color: #7A3A1B; }
+    .tone-mild { background: #E2EAD9; color: #4A7039; }
+
+    /* Raw @keyframes — referenced by the .enter-cascade / .enter-up /
+       .slide-in-left / .push-in / .leaf-bg rules above. Tailwind's JIT
+       emits these only when an `animate-foo` class is used; we use the
+       bare `animation:` shorthand, so the keyframes live here. */
+    @keyframes enterUp {
+      0%   { opacity: 0; transform: translateY(8px) scale(.985); }
+      100% { opacity: 1; transform: translateY(0)   scale(1); }
+    }
+    @keyframes slideInLeft {
+      0%   { opacity: 0; transform: translateX(-12px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slowDrift {
+      0%   { background-position: 0% 0%,   100% 0%,  50% 100%, 0 0;
+             filter: hue-rotate(0deg); }
+      100% { background-position: 4% 6%,   96% 8%,   48% 92%,  0 0;
+             filter: hue-rotate(6deg); }
+    }
+    @keyframes pushIn {
+      0%   { opacity: 0; transform: translateX(-10px) scale(.98); }
+      60%  { opacity: 1; transform: translateX(2px)   scale(1.01); }
+      100% { opacity: 1; transform: translateX(0)     scale(1); }
+    }
+    @keyframes pulseSoft {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(200,68,42,.55); }
+      50%      { box-shadow: 0 0 0 12px rgba(200,68,42,0); }
     }
   </style>
 </head>
@@ -104,7 +243,7 @@
 <body class="antialiased min-h-screen leaf-bg">
 
   <!-- ============== HEADER ============== -->
-  <header class="relative overflow-hidden bg-gradient-to-br from-moss-900 via-moss-700 to-moss-500 text-bark-50 grain">
+  <header class="header-enter relative overflow-hidden bg-gradient-to-br from-moss-900 via-moss-700 to-moss-400 text-bark-50 grain">
     <div class="max-w-7xl mx-auto px-6 sm:px-10 py-7 sm:py-9 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 relative z-10">
       <div class="flex items-center gap-4">
         <div class="w-14 h-14 rounded-2xl bg-bark-50/15 backdrop-blur-sm border border-bark-50/30 grid place-items-center shadow-leaf">
@@ -141,7 +280,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6 lg:gap-8">
 
       <!-- =========== SIDEBAR =========== -->
-      <aside class="space-y-5 lg:sticky lg:top-6 lg:self-start">
+      <aside class="enter-cascade space-y-5 lg:sticky lg:top-6 lg:self-start">
 
         <!-- Location card -->
         <section class="relative bg-white border border-bark-100 rounded-2xl shadow-soil p-5 overflow-hidden">
@@ -223,7 +362,7 @@
       </aside>
 
       <!-- =========== DASHBOARD =========== -->
-      <section class="space-y-6 min-w-0">
+      <section class="enter-cascade-dash space-y-6 min-w-0">
 
         <!-- Live weather + Scorecard row -->
         <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
