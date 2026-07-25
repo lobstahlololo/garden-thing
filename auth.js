@@ -30,7 +30,7 @@
   // serve.py at build step), drop these constants to '' and the
   // meta-tag-only path resumes automatically.
   // ============================================================
-  const FALLBACK_SUPABASE_URL     = 'https://wamrjxsrhdjrnhtnmpd.supabase.co';
+  const FALLBACK_SUPABASE_URL     = 'https://wamrjsslhsfzjtrdtnpd.supabase.co';
   const FALLBACK_SUPABASE_ANON_KEY = 'sb_publishable_6iCnTbEg1yTUK2fKdhED3w_nkr8VXbB';
 
   const listeners = [];
