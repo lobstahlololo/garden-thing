@@ -16,6 +16,23 @@
 (function () {
   'use strict';
 
+  // ============================================================
+  // Last-resort fallback constants.
+  //
+  // Supabase's publishable/anon key is PUBLIC by design — Supabase's
+  // own threat model assumes it reaches the browser (the trust
+  // boundary is Row-Level Security on the tables, already configured
+  // in SUPABASE_SETUP.md, not key secrecy).
+  //
+  // These values are committed ONLY because the deployed bundle on
+  // garden-thing.vercel.app doesn't have runtime env injection. If
+  // server-side substitution gets wired later (build-time inject or
+  // serve.py at build step), drop these constants to '' and the
+  // meta-tag-only path resumes automatically.
+  // ============================================================
+  const FALLBACK_SUPABASE_URL     = 'https://wamrjxsrhdjrnhtnmpd.supabase.co';
+  const FALLBACK_SUPABASE_ANON_KEY = 'sb_publishable_6iCnTbEg1yTUK2fKdhED3w_nkr8VXbB';
+
   const listeners = [];
 
   function emit(evt) {
@@ -83,8 +100,14 @@
   };
 
   function init() {
-    const url = (document.querySelector('meta[name="supabase-url"]') || {}).content || '';
-    const key = (document.querySelector('meta[name="supabase-anon-key"]') || {}).content || '';
+    // Read URL + key with a small fallback chain so the page works
+    // whether it's served by serve.py (meta tag populated), by a
+    // build-time inject step, or by plain static hosting where no
+    // env layer exists.
+    const metaUrl = (document.querySelector('meta[name="supabase-url"]') || {}).content || '';
+    const metaKey = (document.querySelector('meta[name="supabase-anon-key"]') || {}).content || '';
+    const url = metaUrl || FALLBACK_SUPABASE_URL;
+    const key = metaKey || FALLBACK_SUPABASE_ANON_KEY;
     if (!url || !key) {
       emit({
         kind: 'missing-config',
