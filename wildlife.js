@@ -6,6 +6,7 @@
  * main script (they will be — see the small str_replace at refreshLocation call). */
 (function () {
   const SEV_ORDER = { critical: 0, high: 1, medium: 2, low: 3 };
+  const esc = (s) => String(s).replace(/[&<>"\']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
 
   function classifyWildlifeLocal(tallies) {
     const threats = []; const beneficials = []; let totalNuisanceObs = 0; let weightedPressure = 0;
@@ -73,19 +74,19 @@
       <div class="rounded-xl border ${window.threatBorder(t.severity)} ${window.threatBg(t.severity)} p-3.5">
         <div class="flex items-start justify-between gap-3">
           <div class="flex items-start gap-2.5 min-w-0">
-            <div class="text-2xl leading-none shrink-0">${t.emoji}</div>
+            <div class="text-2xl leading-none shrink-0">${esc(t.emoji)}</div>
             <div class="min-w-0">
-              <p class="font-semibold text-bark-900 text-sm">${t.common}</p>
-              <p class="text-xs text-bark-700 mt-0.5">${t.summary}</p>
+              <p class="font-semibold text-bark-900 text-sm">${esc(t.common)}</p>
+              <p class="text-xs text-bark-700 mt-0.5">${esc(t.summary)}</p>
             </div>
           </div>
           <div class="text-right shrink-0">
             <p class="text-[11px] text-bark-600">${t.count} record${t.count > 1 ? 's' : ''}</p>
-            <span class="text-[11px] mt-1 inline-block px-2 py-0.5 rounded-full ${window.threatToneBg(t.severity)} ${window.threatToneFg(t.severity)} font-medium uppercase tracking-wider">${t.severity}</span>
+            <span class="text-[11px] mt-1 inline-block px-2 py-0.5 rounded-full ${window.threatToneBg(t.severity)} ${window.threatToneFg(t.severity)} font-medium uppercase tracking-wider">${esc(t.severity)}</span>
           </div>
         </div>
         <ul class="mt-2.5 ml-1 text-xs text-bark-800 space-y-1">
-          ${t.fixes.map((f) => '<li class="flex gap-1.5"><span class="text-moss-600 shrink-0">\u203A</span><span>' + f + '</span></li>').join('')}
+          ${t.fixes.map((f) => '<li class="flex gap-1.5"><span class="text-moss-600 shrink-0">\u203A</span><span>' + esc(f) + '</span></li>').join('')}
         </ul>
       </div>
     `).join('') : `<p class="text-sm text-bark-600 italic p-3 rounded-xl bg-bark-50">\uD83C\uDF3F No curated pests near ${loc} in the last 90 days \u2014 relax and plant freely.</p>`;
@@ -96,8 +97,8 @@
         <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
           ${benign.slice(0, 4).map((b) => `
             <div class="p-2.5 rounded-lg bg-moss-50 border border-moss-200">
-              <p class="text-sm font-semibold text-bark-900"><span class="mr-1">${b.emoji}</span>${b.common} <span class="text-bark-600 font-normal">\u00D7 ${b.count}</span></p>
-              <p class="text-xs text-bark-700 mt-0.5">${b.summary}</p>
+              <p class="text-sm font-semibold text-bark-900"><span class="mr-1">${esc(b.emoji)}</span>${esc(b.common)} <span class="text-bark-600 font-normal">\u00D7 ${esc(b.count)}</span></p>
+              <p class="text-xs text-bark-700 mt-0.5">${esc(b.summary)}</p>
             </div>`).join('')}
         </div>
       </div>

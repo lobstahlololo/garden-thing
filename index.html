@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://api.inaturalist.org https://*.supabase.co; frame-src https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
+  <!-- Supabase project credentials. fill these in directly with the values from your Supabase dashboard (Project Settings → API). The anon key is intentionally public; RLS is the security boundary. Freebuff env-injection at the proxy can substitute these via template rewrite; until that's set up, paste the values here. -->
+  <meta name="supabase-url" content="" data-injected-by="freebuff-env:SUPABASE_URL" />
+  <meta name="supabase-anon-key" content="" data-injected-by="freebuff-env:SUPABASE_ANON_KEY" />
   <title>MicroGrow · Hyper-Local Garden Planner</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -10,6 +14,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="auth.js" defer></script>
+  <script src="sync.js" defer></script>
   <script src="wildlife.js" defer></script>
   <script>
     tailwind.config = {
@@ -283,7 +290,47 @@
       <aside class="enter-cascade space-y-5 lg:sticky lg:top-6 lg:self-start">
 
         <!-- Location card -->
-        <section class="relative bg-white border border-bark-100 rounded-2xl shadow-soil p-5 overflow-hidden">
+        <!-- Auth card: sign-up / sign-in / signed-in / check-inbox states. Toggled by auth.js via window.microgrowAuth + window.microgrowSync hooks. -->
+    <section id="authCard" class="relative bg-white border border-bark-100 rounded-2xl shadow-soil p-5 overflow-hidden">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="display text-lg font-semibold text-moss-800">🔐 Account</h2>
+        <span id="authModeBadge" class="text-[11px] uppercase tracking-wider text-bark-600">Signed&nbsp;out</span>
+      </div>
+
+      <!-- Signed-out: form -->
+      <div id="authSignedOutPanel">
+        <label for="authEmailInput" class="text-xs font-medium text-bark-600">Email</label>
+        <input id="authEmailInput" type="email" autocomplete="email" placeholder="you@example.com" class="mt-1 w-full rounded-xl border-bark-200 bg-bark-50/40 px-3 py-2 text-sm text-bark-900 placeholder-bark-400 focus:border-moss-500 focus:ring-2 focus:ring-moss-200 outline-none" />
+        <label for="authPasswordInput" class="mt-3 block text-xs font-medium text-bark-600">Password (≥ 6 chars)</label>
+        <input id="authPasswordInput" type="password" autocomplete="current-password" placeholder="••••••••" class="mt-1 w-full rounded-xl border-bark-200 bg-bark-50/40 px-3 py-2 text-sm text-bark-900 placeholder-bark-400 focus:border-moss-500 focus:ring-2 focus:ring-moss-200 outline-none" />
+        <div class="grid grid-cols-2 gap-2 mt-3">
+          <button id="authSignUpBtn" type="button" class="inline-flex items-center justify-center gap-2 bg-moss-700 hover:bg-moss-800 active:bg-moss-900 text-bark-50 text-sm font-medium px-3 py-2 rounded-xl shadow-soil transition disabled:opacity-50">Sign up</button>
+          <button id="authSignInBtn" type="button" class="inline-flex items-center justify-center gap-2 bg-bark-100 hover:bg-bark-200 text-bark-900 text-sm font-medium px-3 py-2 rounded-xl transition disabled:opacity-50">Sign in</button>
+        </div>
+        <div class="mt-2 flex items-center justify-between text-[11px] text-bark-600">
+          <button id="authForgotBtn" type="button" class="underline hover:text-moss-700 disabled:opacity-50">Forgot password?</button>
+          <button id="authResendBtn" type="button" class="underline hover:text-moss-700 disabled:opacity-50">Resend confirmation</button>
+        </div>
+      </div>
+
+      <!-- Check-inbox: shown after sign-up while email confirmation is pending -->
+      <div id="authConfirmPanel" class="hidden">
+        <p class="text-sm text-bark-800">📬 Check your inbox — we sent a confirmation link.</p>
+        <p class="text-[11px] text-bark-600 mt-1">Click the link, then come back. We'll auto-detect the session.</p>
+        <button id="authResendBtn2" type="button" class="mt-3 w-full inline-flex items-center justify-center gap-2 bg-bark-100 hover:bg-bark-200 text-bark-900 text-sm font-medium px-3 py-2 rounded-xl transition">Resend confirmation email</button>
+      </div>
+
+      <!-- Signed-in: show email + sign out -->
+      <div id="authSignedInPanel" class="hidden">
+        <p class="text-sm text-bark-800">Signed in as <span id="authEmail" class="font-semibold mono"></span></p>
+        <p class="text-[11px] text-moss-700 mt-1">✓ Your yard, last location, and query history are syncing.</p>
+        <button id="authSignOutBtn" type="button" class="mt-3 w-full inline-flex items-center justify-center gap-2 bg-bark-100 hover:bg-bark-200 text-bark-900 text-sm font-medium px-3 py-2 rounded-xl transition">Sign out</button>
+      </div>
+
+      <p id="authStatus" class="text-[11px] mt-2 min-h-[1em] font-medium"></p>
+    </section>
+
+    <section class="relative bg-white border border-bark-100 rounded-2xl shadow-soil p-5 overflow-hidden">
           <div class="flex items-center justify-between mb-3">
             <h2 class="display text-lg font-semibold text-moss-800">📍 Location</h2>
             <span class="text-[11px] uppercase tracking-wider text-bark-600">Step 1</span>
@@ -511,7 +558,27 @@
           </div>
         </article>
 
+        
+        <!-- Privacy & Data card -->
+        <article class="bg-white/60 border border-bark-100 rounded-2xl shadow-soil p-5">
+          <details class="text-sm text-bark-700">
+            <summary class="cursor-pointer display text-base font-semibold text-bark-900">🛡️ Privacy &amp; data — what we collect</summary>
+            <div class="mt-3 leading-relaxed">
+              <p><strong>Signed-out (default):</strong> nothing is stored or remembered. No accounts, no cookies, no localStorage, no analytics, no fingerprinting. The page refreshes and you start fresh.</p>
+              <p class="mt-2"><strong>Signed-in:</strong> a single encrypted auth token is saved to your browser's localStorage so you stay signed in across reloads. This is the <span class="mono">JWT</span> token Supabase issues at sign-in — it is not your password. Your saved yard profile, last queried location, and recent query history are stored server-side in <a class="underline hover:text-moss-700" href="https://supabase.com/" target="_blank" rel="noopener">Supabase</a> under row-level security scoped to your user id. Nothing is shared with anyone else.</p>
+              <p class="mt-2">Each location query sends your typed string (or coordinates) to the third-party services below so they can return live data:</p>
+              <ul class="mt-2 ml-4 list-disc space-y-1">
+                <li><a class="underline hover:text-moss-700" href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> — geocode, forecast, and air-quality. They see the city/ZIP you typed.</li>
+                <li><a class="underline hover:text-moss-700" href="https://www.inaturalist.org/" target="_blank" rel="noopener">iNaturalist</a> — wildlife observations. They see your approximate lat/lon.</li>
+                <li><a class="underline hover:text-moss-700" href="https://supabase.com/" target="_blank" rel="noopener">Supabase</a> — auth + per-user database (only when signed in).</li>
+              </ul>
+              <p class="mt-2">Fonts are loaded from <span class="mono">fonts.googleapis.com</span>. Direct questions to <a class="underline hover:text-moss-700" href="https://github.com/lobstahlololo/garden-thing" target="_blank" rel="noopener">the repository</a>.</p>
+            </div>
+          </details>
+        </article>
+
         <p class="text-[11px] text-bark-600 text-center pt-2">
+
           Weather data · <a class="underline hover:text-moss-700" href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> · Wildlife observations · <a class="underline hover:text-moss-700" href="https://www.inaturalist.org/" target="_blank" rel="noopener">iNaturalist</a> · Baseline frost dates are regional heuristics, tune them to your 10-year USDA/NWS average.
         </p>
       </section>
@@ -779,6 +846,11 @@
     const fmtTime = (d) => d.toLocaleTimeString(undefined, { hour:'numeric', minute:'2-digit' });
     const addDays = (d, n) => { const c = new Date(d); c.setDate(c.getDate() + n); return c; };
     const signed = (n) => (n > 0 ? '+' : '') + n;
+    // HTML-escape for any interpolated value going into an innerHTML template.
+    // Defense-in-depth: today all values flowing into innerHTML are curated
+    // (hard-coded strings + a Math.round()ed number), but if an API string ever
+    // flows through, this keeps the page safe.
+    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 
     /* ============================================================
        API · Open-Meteo (no key, no auth)
@@ -908,6 +980,10 @@
       try {
         const geo = await geocode(query);
         state.geo = geo;
+        if (window.microgrowSync && window.microgrowSync.ready) {
+          const labelFull = geo.name + (geo.admin1 ? ', ' + geo.admin1 : '') + (geo.country ? ' · ' + geo.country : '');
+          window.microgrowSync.logQuery(query, labelFull, geo.latitude, geo.longitude);
+        }
         setStatus('🌤 Pulling live forecast…', 'info');
         const [wxR, wildlifeR] = await Promise.allSettled([
           fetchWeather(geo.latitude, geo.longitude),
@@ -1113,7 +1189,7 @@
         if (mod.weatherFlags.length) {
           const top = mod.weatherFlags[0];
           els.wxBadge.className = `mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${badgeTone(top.tone)}`;
-          els.wxBadge.innerHTML = `<span>${top.emoji}</span><span>${top.text}</span>`;
+          els.wxBadge.innerHTML = `<span>${esc(top.emoji)}</span><span>${esc(top.text)}</span>`;
           els.wxBadge.classList.remove('hidden');
         } else {
           els.wxBadge.classList.add('hidden');
@@ -1139,9 +1215,9 @@
       // --- Scorecard ---
       els.scoreList.innerHTML = mod.scoreChips.map(chip => `
         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${chipTone(chip.tone)}">
-          <span>${chip.emoji}</span>
-          <span>${chip.label}</span>
-          ${chip.sub ? `<span class="opacity-70">· ${chip.sub}</span>` : ''}
+          <span>${esc(chip.emoji)}</span>
+          <span>${esc(chip.label)}</span>
+          ${chip.sub ? `<span class="opacity-70">· ${esc(chip.sub)}</span>` : ''}
         </span>
       `).join('') || `<span class="text-xs text-bark-600">Pick your topography to begin.</span>`;
 
@@ -1157,10 +1233,10 @@
       els.alertList.innerHTML = mod.alerts.length
         ? mod.alerts.map(a => `
             <li class="flex gap-3 p-3.5 rounded-xl border ${alertBorder(a.tone)} ${alertBg(a.tone)} animate-fade-up">
-              <div class="text-2xl leading-none">${a.icon}</div>
+              <div class="text-2xl leading-none">${esc(a.icon)}</div>
               <div class="min-w-0">
-                <p class="font-semibold text-bark-900 text-sm">${a.title}</p>
-                <p class="text-sm text-bark-800 mt-0.5 leading-relaxed">${a.body}</p>
+                <p class="font-semibold text-bark-900 text-sm">${esc(a.title)}</p>
+                <p class="text-sm text-bark-800 mt-0.5 leading-relaxed">${esc(a.body)}</p>
               </div>
             </li>
           `).join('')
@@ -1182,18 +1258,21 @@
         return `
           <tr class="border-b border-bark-100/70 hover:bg-bark-50/40 transition">
             <td class="py-3 pr-4">
-              <span class="text-xl mr-2">${c.emoji}</span>
-              <span class="font-medium text-bark-900">${c.name}</span>
+              <span class="text-xl mr-2">${esc(c.emoji)}</span>
+              <span class="font-medium text-bark-900">${esc(c.name)}</span>
             </td>
-            <td class="py-3 pr-4 text-xs text-bark-700">${kindLabel}</td>
-            <td class="py-3 pr-4 text-bark-800">${fmtDate(baseline)}</td>
-            <td class="py-3 pr-4 font-medium ${adjustedStyles(adjusted, c)}">${fmtDateLong(adjusted)}</td>
+            <td class="py-3 pr-4 text-xs text-bark-700">${esc(kindLabel)}</td>
+            <td class="py-3 pr-4 text-bark-800">${esc(fmtDate(baseline))}</td>
+            <td class="py-3 pr-4 font-medium ${adjustedStyles(adjusted, c)}">${esc(fmtDateLong(adjusted))}</td>
             <td class="py-3 pr-4">${shiftLabel}</td>
-            <td class="py-3 text-xs text-bark-600 max-w-[260px]">${c.note}</td>
+            <td class="py-3 text-xs text-bark-600 max-w-[260px]">${esc(c.note)}</td>
           </tr>
         `;
       }).join('');
     }
+
+    // Expose render to other scripts (sync.js calls it on SIGNED_IN hydration).
+    window.render = render;
 
     // Comp helpers
     function baselineDateFor(c) {
@@ -1270,6 +1349,13 @@
       sel.addEventListener('change', () => {
         state[sel.id] = sel.value;
         render();
+        if (window.microgrowSync && window.microgrowSync.ready) {
+          window.microgrowSync.saveYardSettings({
+            topography: state.topography,
+            infrastructure: state.infrastructure,
+            soil: state.soil,
+          });
+        }
       });
     });
     els.locInput.addEventListener('keydown', (e) => {
@@ -1282,5 +1368,166 @@
     render();
     refreshLocation(els.locInput.value);
   </script>
+
+  <!-- =========================================================
+       Auth UI wiring · runs after the main inline app script so
+       it can safely look up #authCard / #authEmail etc. and wait
+       for window.microgrowAuth (loaded with defer) to materialize.
+       ========================================================= -->
+  <script>
+  (function () {
+    'use strict';
+    const $ = (id) => document.getElementById(id);
+    const els = {
+      card:      $('authCard'),
+      outPanel:  $('authSignedOutPanel'),
+      confPanel: $('authConfirmPanel'),
+      inPanel:   $('authSignedInPanel'),
+      emailSpan: $('authEmail'),
+      badge:     $('authModeBadge'),
+      status:    $('authStatus'),
+      emailInput:    $('authEmailInput'),
+      passwordInput: $('authPasswordInput'),
+      btnSignUp:   $('authSignUpBtn'),
+      btnSignIn:   $('authSignInBtn'),
+      btnSignOut:  $('authSignOutBtn'),
+      btnForgot:   $('authForgotBtn'),
+      btnResend:   $('authResendBtn'),
+      btnResend2:  $('authResendBtn2'),
+    };
+
+    function setStatus(msg, kind) {
+      if (!els.status) return;
+      els.status.textContent = msg;
+      const color =
+        kind === 'ok'   ? 'text-moss-700' :
+        kind === 'err'  ? 'text-red-600' :
+        kind === 'warn' ? 'text-clay-700' :
+                          'text-bark-600';
+      els.status.className = 'text-[11px] mt-2 min-h-[1em] font-medium ' + color;
+    }
+
+    function show(mode /* 'out' | 'confirm' | 'in' */, email) {
+      if (els.outPanel)  els.outPanel.classList.toggle('hidden',  mode !== 'out');
+      if (els.confPanel) els.confPanel.classList.toggle('hidden', mode !== 'confirm');
+      if (els.inPanel)   els.inPanel.classList.toggle('hidden',   mode !== 'in');
+      if (els.emailSpan && (mode === 'in')) els.emailSpan.textContent = email || '';
+      if (els.badge) {
+        els.badge.textContent = mode === 'in' ? 'Signed in'
+                              : mode === 'confirm' ? 'Awaiting confirmation'
+                              : 'Signed out';
+      }
+    }
+
+    function wire() {
+      if (!window.microgrowAuth) { setTimeout(wire, 80); return; }
+
+      function busy(on) {
+        [els.btnSignUp, els.btnSignIn, els.btnSignOut, els.btnForgot,
+         els.btnResend, els.btnResend2].forEach((b) => {
+          if (b) b.disabled = !!on;
+        });
+      }
+
+      els.btnSignUp.addEventListener('click', async () => {
+        const email = els.emailInput.value.trim();
+        const password = els.passwordInput.value;
+        if (!email || !password) { setStatus('\u26A0\uFE0F Email and password required.', 'warn'); return; }
+        if (password.length < 6) { setStatus('\u26A0\uFE0F Password must be at least 6 characters.', 'warn'); return; }
+        busy(true); setStatus('Creating account\u2026', 'info');
+        const r = await window.microgrowAuth.signUp({ email, password });
+        busy(false);
+        if (!r.ok) { setStatus('\u274C ' + r.error, 'err'); return; }
+        if (r.needsEmailConfirmation) {
+          show('confirm');
+          setStatus('\u2709\uFE0F Confirmation email sent. Check your inbox.', 'ok');
+        } else {
+          show('in', r.user);
+          setStatus('\u2713 Signed in as ' + r.user, 'ok');
+          els.emailInput.value = ''; els.passwordInput.value = '';
+        }
+      });
+
+      els.btnSignIn.addEventListener('click', async () => {
+        const email = els.emailInput.value.trim();
+        const password = els.passwordInput.value;
+        if (!email || !password) { setStatus('\u26A0\uFE0F Email and password required.', 'warn'); return; }
+        busy(true); setStatus('Signing in\u2026', 'info');
+        const r = await window.microgrowAuth.signIn({ email, password });
+        busy(false);
+        if (!r.ok) { setStatus('\u274C ' + r.error, 'err'); return; }
+        show('in', r.user);
+        setStatus('\u2713 Signed in as ' + r.user, 'ok');
+        els.emailInput.value = ''; els.passwordInput.value = '';
+      });
+
+      els.btnSignOut.addEventListener('click', async () => {
+        busy(true); setStatus('Signing out\u2026', 'info');
+        const r = await window.microgrowAuth.signOut();
+        busy(false);
+        if (!r.ok) { setStatus('\u274C ' + r.error, 'err'); return; }
+        show('out');
+        setStatus('Signed out. Reload to clear cached data.', 'ok');
+      });
+
+      els.btnForgot.addEventListener('click', async () => {
+        const email = els.emailInput.value.trim();
+        if (!email) { setStatus('\u26A0\uFE0F Enter your email above first.', 'warn'); return; }
+        if (els.btnForgot) els.btnForgot.disabled = true;
+        const r = await window.microgrowAuth.resetPassword({ email });
+        if (els.btnForgot) els.btnForgot.disabled = false;
+        if (!r.ok) { setStatus('\u274C ' + r.error, 'err'); return; }
+        setStatus(r.message || '\u2709\uFE0F Reset link sent.', 'ok');
+      });
+
+      async function handleResend() {
+        const email = els.emailInput.value.trim();
+        if (!email) { setStatus('\u26A0\uFE0F Enter your email above first.', 'warn'); return; }
+        // Use signUp to resend confirmation. The user may or may not exist; auth.js
+        // returns a generic ok shape either way (anti-enumeration).
+        const password = els.passwordInput.value || ' 123456 '; // dummy; ignored if account exists, harmless if not
+        if (els.btnResend)  els.btnResend.disabled = true;
+        if (els.btnResend2) els.btnResend2.disabled = true;
+        setStatus('Sending\u2026', 'info');
+        const r = await window.microgrowAuth.signUp({ email, password });
+        if (els.btnResend)  els.btnResend.disabled = false;
+        if (els.btnResend2) els.btnResend2.disabled = false;
+        if (r.ok) {
+          setStatus('\u2709\uFE0F If that account exists, a new confirmation email is on its way.', 'ok');
+        } else {
+          setStatus('\u274C ' + (r.error || 'Failed to send.'), 'err');
+        }
+      }
+      if (els.btnResend)  els.btnResend.addEventListener('click', handleResend);
+      if (els.btnResend2) els.btnResend2.addEventListener('click', handleResend);
+
+      window.microgrowAuth.onEvent((evt) => {
+        if (evt.kind === 'missing-config') {
+          if (els.card) els.card.classList.add('opacity-60', 'pointer-events-none');
+          setStatus('\u26A0\uFE0F Supabase not configured. Set <SUPABASE_URL> + <SUPABASE_ANON_KEY> meta tags (see SUPABASE_SETUP.md).', 'err');
+        } else if (evt.kind === 'missing-lib') {
+          if (els.card) els.card.classList.add('opacity-60', 'pointer-events-none');
+          setStatus('\u26A0\uFE0F Supabase JS library failed to load. Check CSP / network.', 'err');
+        } else if (evt.kind === 'initial-session' && evt.session && evt.session.user) {
+          show('in', evt.session.user.email);
+        } else if (evt.kind === 'auth-event') {
+          if (evt.event === 'SIGNED_IN' && evt.session && evt.session.user) {
+            show('in', evt.session.user.email);
+          } else if (evt.event === 'SIGNED_OUT') {
+            show('out');
+          }
+        }
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', wire);
+    } else {
+      wire();
+    }
+  })();
+  </script>
+
+</body>
 </body>
 </html>
