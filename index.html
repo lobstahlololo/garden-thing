@@ -3,10 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://api.inaturalist.org https://*.supabase.co; frame-src https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.open-meteo.com https://geocoding-api.open-meteo.com https://api.inaturalist.org https://*.supabase.co https://generativelanguage.googleapis.com; frame-src https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" />
   <!-- Supabase project credentials. fill these in directly with the values from your Supabase dashboard (Project Settings → API). The anon key is intentionally public; RLS is the security boundary. Freebuff env-injection at the proxy can substitute these via template rewrite; until that's set up, paste the values here. -->
   <meta name="supabase-url" content="" data-injected-by="freebuff-env:SUPABASE_URL" />
   <meta name="supabase-anon-key" content="" data-injected-by="freebuff-env:SUPABASE_ANON_KEY" />
+  <!-- Gemini AI key. Add GEMINI_API_KEY in the Freebuff Keys panel (or set window.__MICROGROW_GEMINI_KEY__ for local dev). Get a free key at https://aistudio.google.com/apikey -->
+  <meta name="gemini-api-key" content="" data-injected-by="freebuff-env:GEMINI_API_KEY" />
   <title>MicroGrow · Hyper-Local Garden Planner</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,6 +20,8 @@
   <script src="auth.js" defer></script>
   <script src="sync.js" defer></script>
   <script src="wildlife.js" defer></script>
+  <script src="gemini.js" defer></script>
+  <script src="gemini-ui.js" defer></script>
   <script>
     tailwind.config = {
       theme: {
@@ -94,6 +98,120 @@
       --bad:     #A1271B;
       --cool:    #3F6E89;
     }
+
+    /* =========================================================
+       Dark theme · Night Garden Journal
+       Warm creams on deep botanical blacks.
+       ========================================================= */
+    [data-theme="dark"] {
+      --canvas-1:#0F1A14;   /* midnight moss */
+      --canvas-2:#162119;   /* deep fern */
+      --ink:     #E8E2CE;   /* warm paper-cream */
+      --ink-2:   #A89370;   /* muted gold-brown */
+      --accent:  #E07050;   /* softened vermilion */
+      --good:    #7BA860;
+      --warn:    #D4855A;
+      --bad:     #C44A3D;
+      --cool:    #6A9AB5;
+    }
+
+    /* ---- Dark-theme Tailwind overrides ----
+       Cards, borders, and section backgrounds that use hardcoded
+       Tailwind utility classes (not CSS variables) get overridden
+       when the data-theme="dark" attribute is present on <html>. */
+    [data-theme="dark"] .\!bg-white,
+    [data-theme="dark"] .bg-white,
+    [data-theme="dark"] .bg-white\/60 {
+      background-color: #1A2A20 !important;
+    }
+    [data-theme="dark"] .bg-white\/60 {
+      background-color: rgba(26,42,32,.6) !important;
+    }
+    [data-theme="dark"] .border-bark-100 {
+      border-color: #2A3D30 !important;
+    }
+    [data-theme="dark"] .border-bark-200 {
+      border-color: #3A4F42 !important;
+    }
+    [data-theme="dark"] .bg-bark-50\/70 {
+      background-color: rgba(26,42,32,.7) !important;
+    }
+    [data-theme="dark"] .bg-bark-50\/40 {
+      background-color: rgba(26,42,32,.4) !important;
+    }
+    [data-theme="dark"] .bg-bark-100 {
+      background-color: #2A3D30 !important;
+    }
+    [data-theme="dark"] .hover\:bg-bark-200:hover {
+      background-color: #3A4F42 !important;
+    }
+    [data-theme="dark"] .bg-bark-50\/10 {
+      background-color: rgba(26,42,32,.1) !important;
+    }
+    [data-theme="dark"] .border-bark-50\/20,
+    [data-theme="dark"] .border-bark-50\/30 {
+      border-color: rgba(232,226,206,.12) !important;
+    }
+    [data-theme="dark"] .bg-bark-50\/15 {
+      background-color: rgba(232,226,206,.08) !important;
+    }
+    [data-theme="dark"] .text-bark-50,
+    [data-theme="dark"] .text-bark-50\/90 {
+      color: #E8E2CE !important;
+    }
+    [data-theme="dark"] .text-bark-50\/90 {
+      color: rgba(232,226,206,.9) !important;
+    }
+    [data-theme="dark"] .text-bark-100\/80,
+    [data-theme="dark"] .text-bark-100\/85 {
+      color: rgba(200,190,170,.85) !important;
+    }
+    [data-theme="dark"] .text-bark-900 {
+      color: #E8E2CE !important;
+    }
+    [data-theme="dark"] .text-bark-800 {
+      color: #D4CCB8 !important;
+    }
+    [data-theme="dark"] .text-bark-700 {
+      color: #B8AE98 !important;
+    }
+    [data-theme="dark"] .text-bark-600 {
+      color: #A89370 !important;
+    }
+    [data-theme="dark"] .text-moss-800 {
+      color: #9DB97D !important;
+    }
+    [data-theme="dark"] .text-moss-700 {
+      color: #8BA668 !important;
+    }
+    [data-theme="dark"] .text-clay-700 {
+      color: #D4855A !important;
+    }
+    [data-theme="dark"] .bg-clay-100 {
+      background-color: rgba(212,133,90,.15) !important;
+    }
+    [data-theme="dark"] .text-clay-700 {
+      color: #D4855A !important;
+    }
+    [data-theme="dark"] .placeholder-bark-400::placeholder {
+      color: #6B7A6A !important;
+    }
+    [data-theme="dark"] input,
+    [data-theme="dark"] select {
+      color: #E8E2CE !important;
+    }
+    [data-theme="dark"] .bg-clay-400\/20 {
+      background-color: rgba(212,133,90,.1) !important;
+    }
+    [data-theme="dark"] .bg-moss-500\/15 {
+      background-color: rgba(91,130,69,.1) !important;
+    }
+    [data-theme="dark"] .tone-good { background: #1F3D2B; color: #9DB97D; }
+    [data-theme="dark"] .tone-warn { background: #2F1F16; color: #D4855A; }
+    [data-theme="dark"] .tone-bad  { background: #2A1512; color: #C44A3D; }
+    [data-theme="dark"] .tone-cool { background: #17242D; color: #6A9AB5; }
+    [data-theme="dark"] .tone-warm { background: #2A1F16; color: #D4855A; }
+    [data-theme="dark"] .tone-mild { background: #1F2D1A; color: #7BA860; }
 
     html, body {
       background: linear-gradient(180deg, var(--canvas-1) 0%, var(--canvas-2) 100%);
@@ -278,6 +396,10 @@
           </span>
           <span id="liveLabel" class="text-bark-50/90 font-medium">Awaiting location…</span>
         </span>
+        <button id="themeToggle" type="button" aria-label="Toggle theme" title="Switch light / dark theme"
+          class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-bark-50/10 border border-bark-50/20 hover:bg-bark-50/20 transition text-bark-50/90 text-lg leading-none">
+          <span id="themeToggleIcon">🌙</span>
+        </button>
       </div>
     </div>
   </header>
@@ -559,6 +681,54 @@
         </article>
 
         
+        <!-- Gemini AI Plant Helper -->
+        <article id="geminiCard" class="relative bg-white border border-bark-100 rounded-2xl shadow-soil p-6 overflow-hidden">
+          <div class="pointer-events-none absolute -top-10 -right-10 w-36 h-36 rounded-full bg-frost-300/10"></div>
+          <div class="relative">
+            <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
+              <div>
+                <p class="text-[11px] uppercase tracking-wider text-bark-600 font-medium">AI Plant Encyclopedia</p>
+                <h3 class="display text-2xl font-semibold text-bark-900 mt-0.5">
+                  <span class="bg-gradient-to-r from-frost-500 via-clay-500 to-moss-500 bg-clip-text text-transparent">✨ Gemini</span> Plant Lookup
+                </h3>
+                <p class="text-xs text-bark-600 mt-1 max-w-prose">
+                  Ask Gemini about any plant not in our built-in table — growing tips, spacing, frost tolerance, and more.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex gap-2.5">
+              <input
+                id="geminiPlantInput"
+                type="text"
+                placeholder="e.g. Okra, Dragonfruit, Asparagus…"
+                class="flex-1 rounded-xl border-bark-200 bg-bark-50/40 px-3.5 py-2.5 text-sm text-bark-900 placeholder-bark-400 focus:border-frost-500 focus:ring-2 focus:ring-frost-200 outline-none"
+              />
+              <button id="geminiLookupBtn" type="button"
+                class="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-frost-500 to-frost-700 hover:from-frost-600 hover:to-frost-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow-soil transition active:scale-[.98] disabled:opacity-50">
+                <svg viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/></svg>
+                Ask Gemini
+              </button>
+            </div>
+
+            <p id="geminiStatus" class="text-[11px] text-bark-600 mt-2 min-h-[1em]"></p>
+
+            <!-- Result card (hidden until a lookup returns) -->
+            <div id="geminiResult" class="hidden mt-4 rounded-xl border border-frost-200 bg-gradient-to-br from-frost-50/60 to-bark-50/40 p-5">
+              <div class="flex items-center justify-between mb-3">
+                <p class="text-xs uppercase tracking-wider text-frost-700 font-semibold">
+                  <span id="geminiResultLabel">Plant Info</span>
+                </p>
+                <span class="text-[10px] text-bark-500 italic">via Gemini AI</span>
+              </div>
+              <div id="geminiResultBody" class="text-sm text-bark-800 leading-relaxed space-y-1.5"></div>
+              <p class="text-[10px] text-bark-500 mt-3 italic">
+                ⚠️ AI-generated — verify against local extension office or seed packet before planting.
+              </p>
+            </div>
+          </div>
+        </article>
+
         <!-- Privacy & Data card -->
         <article class="bg-white/60 border border-bark-100 rounded-2xl shadow-soil p-5">
           <details class="text-sm text-bark-700">
@@ -571,6 +741,7 @@
                 <li><a class="underline hover:text-moss-700" href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> — geocode, forecast, and air-quality. They see the city/ZIP you typed.</li>
                 <li><a class="underline hover:text-moss-700" href="https://www.inaturalist.org/" target="_blank" rel="noopener">iNaturalist</a> — wildlife observations. They see your approximate lat/lon.</li>
                 <li><a class="underline hover:text-moss-700" href="https://supabase.com/" target="_blank" rel="noopener">Supabase</a> — auth + per-user database (only when signed in).</li>
+                <li><a class="underline hover:text-moss-700" href="https://ai.google.dev/" target="_blank" rel="noopener">Google Gemini</a> — AI plant lookup (only sends the plant name you typed).</li>
               </ul>
               <p class="mt-2">Fonts are loaded from <span class="mono">fonts.googleapis.com</span>. Direct questions to <a class="underline hover:text-moss-700" href="https://github.com/lobstahlololo/garden-thing" target="_blank" rel="noopener">the repository</a>.</p>
             </div>
@@ -590,6 +761,42 @@
        MicroGrow · single-file garden planner
        Stack: vanilla JS + Tailwind (CDN) + Open-Meteo (no auth)
        ============================================================ */
+
+    /* ---------- Theme switcher ---------- */
+    (function () {
+      const KEY = 'microgrow-theme';
+      const html = document.documentElement;
+      const toggle = document.getElementById('themeToggle');
+      const icon   = document.getElementById('themeToggleIcon');
+
+      function apply(theme) {
+        html.setAttribute('data-theme', theme);
+        if (icon) icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+      }
+
+      function getSystem() {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+
+      // Restore saved preference, or fall back to system
+      const saved = (function () {
+        try { return localStorage.getItem(KEY); } catch (_) { return null; }
+      })();
+      apply(saved || getSystem());
+
+      // Listen for system changes (only if user hasn't overridden)
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
+        try { if (!localStorage.getItem(KEY)) apply(e.matches ? 'dark' : 'light'); } catch (_) {}
+      });
+
+      if (toggle) {
+        toggle.addEventListener('click', function () {
+          const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+          apply(next);
+          try { localStorage.setItem(KEY, next); } catch (_) {}
+        });
+      }
+    })();
 
     /* ---------- Config / baselines ---------- */
     const BASELINE = {
