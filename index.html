@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -119,19 +119,28 @@
        Cards, borders, and section backgrounds that use hardcoded
        Tailwind utility classes (not CSS variables) get overridden
        when the data-theme="dark" attribute is present on <html>. */
+    /* Premium glass surfaces — frosted botanical noir */
     [data-theme="dark"] .\!bg-white,
     [data-theme="dark"] .bg-white,
     [data-theme="dark"] .bg-white\/60 {
-      background-color: #1A2A20 !important;
+      background-color: rgba(17,26,21,.72) !important;
+      background-image: linear-gradient(180deg, rgba(232,226,206,.035), rgba(232,226,206,0) 42%) !important;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
     }
     [data-theme="dark"] .bg-white\/60 {
-      background-color: rgba(26,42,32,.6) !important;
+      background-color: rgba(15,22,18,.55) !important;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
     [data-theme="dark"] .border-bark-100 {
-      border-color: #2A3D30 !important;
+      border-color: rgba(232,226,206,.09) !important;
     }
     [data-theme="dark"] .border-bark-200 {
-      border-color: #3A4F42 !important;
+      border-color: rgba(232,226,206,.16) !important;
+    }
+    [data-theme="dark"] .shadow-soil {
+      box-shadow: 0 20px 50px -24px rgba(0,0,0,.65), 0 2px 8px -2px rgba(0,0,0,.4) !important;
     }
     [data-theme="dark"] .bg-bark-50\/70 {
       background-color: rgba(26,42,32,.7) !important;
@@ -244,6 +253,17 @@
     }
     body { font-family: 'Geist', system-ui, sans-serif; color: var(--ink); }
 
+    /* Premium dark canvas — layered glows over carbon moss */
+    [data-theme="dark"] html,
+    [data-theme="dark"] body {
+      background:
+        radial-gradient(1100px 620px at 80% -12%, rgba(200,104,64,.12), transparent 62%),
+        radial-gradient(1000px 560px at 8% -6%,  rgba(91,130,69,.16), transparent 60%),
+        radial-gradient(1400px 900px at 50% 118%, rgba(49,84,60,.20), transparent 65%),
+        linear-gradient(180deg, #0A100C 0%, #0D1611 55%, #090E0B 100%);
+      background-attachment: fixed;
+    }
+
     .display { font-family: 'Fraunces', Georgia, serif; font-feature-settings: "ss01", "ss02"; }
     .mono    { font-family: 'JetBrains Mono', ui-monospace, monospace; font-feature-settings: "tnum"; }
     .ink     { color: var(--ink); }
@@ -275,7 +295,7 @@
     /* Header ink grain (subtle, ink-tinted) */
     .grain::before {
       content: ''; position: absolute; inset: 0; pointer-events: none;
-      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.09  0 0 0 0 0.17  0 0 0 0 0.12  0 0 0 0.06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.09  0 0 0 0 0.17  0 0 0 0 0.12  0 0 0 0 0.06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
       opacity: .4; mix-blend-mode: multiply; border-radius: inherit;
     }
     /* Topographic hairlines on the dark header for the journal-page moment */
@@ -310,6 +330,81 @@
 
     /* Karuta card edge - thin warm rule used on dashboard cards */
     .card-rule { box-shadow: inset 0 0 0 1px rgba(31,61,43,.06), 0 1px 0 rgba(23,43,30,.04), 0 12px 32px -16px rgba(23,43,30,.18); }
+    [data-theme="dark"] .card-rule {
+      box-shadow: inset 0 0 0 1px rgba(232,226,206,.055), 0 24px 60px -30px rgba(0,0,0,.65);
+    }
+
+    /* =========================================================
+       Premium dark app shell · header, nav tabs, panels
+       ========================================================= */
+
+    /* Dark leaf-bg tuning — moodier washes over carbon moss */
+    [data-theme="dark"] .leaf-bg {
+      background-image:
+        radial-gradient(circle at 8% 8%,   rgba(74,112,57,.18)  0, transparent 42%),
+        radial-gradient(circle at 94% 2%,  rgba(200,104,64,.12) 0, transparent 36%),
+        radial-gradient(circle at 50% 106%,rgba(45,87,57,.22)   0, transparent 62%),
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'><g fill='none' stroke='%232F5540' stroke-width='0.6' stroke-dasharray='2 5' opacity='0.5'><ellipse cx='120' cy='120' rx='40' ry='24'/><ellipse cx='120' cy='120' rx='75' ry='45'/><ellipse cx='120' cy='120' rx='115' ry='68'/><ellipse cx='120' cy='120' rx='160' ry='95'/></g></svg>");
+      background-repeat: no-repeat, no-repeat, no-repeat, repeat;
+      background-size: 100% 100%, 100% 100%, 100% 100%, 240px 240px;
+    }
+    [data-theme="dark"] .leaf-bg::after {
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'><g fill='%23E07050' opacity='0.5'><circle cx='120' cy='120' r='1.1'/><circle cx='195' cy='138' r='0.8'/><circle cx='45'  cy='102' r='0.8'/></g></svg>");
+    }
+
+    /* ---- App-shell header ---- */
+    .app-shell-header {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(10,16,12,.78);
+      -webkit-backdrop-filter: blur(16px) saturate(140%);
+      backdrop-filter: blur(16px) saturate(140%);
+      border-bottom: 1px solid rgba(232,226,206,.07);
+      box-shadow: 0 12px 40px -20px rgba(0,0,0,.55);
+    }
+    .brand-mark {
+      display: grid; place-items: center;
+      width: 2.75rem; height: 2.75rem; border-radius: .9rem;
+      background: linear-gradient(160deg, #3E6B44, #1E3D2B 70%);
+      border: 1px solid rgba(232,226,206,.14);
+      box-shadow: inset 0 1px 0 rgba(232,226,206,.12), 0 10px 26px -12px rgba(0,0,0,.6);
+    }
+
+    /* ---- Nav tabs ---- */
+    .nav-tabs {
+      display: flex; gap: .35rem; overflow-x: auto;
+      padding-bottom: .9rem; scrollbar-width: none;
+    }
+    .nav-tabs::-webkit-scrollbar { display: none; }
+    .nav-tab {
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: .52rem 1rem; border-radius: .8rem;
+      font-size: .82rem; font-weight: 500; letter-spacing: .01em;
+      color: rgba(232,226,206,.62);
+      background: transparent; border: 1px solid transparent;
+      white-space: nowrap; cursor: pointer;
+      transition: color .2s cubic-bezier(.2,.7,.2,1),
+                  background .2s cubic-bezier(.2,.7,.2,1),
+                  border-color .2s cubic-bezier(.2,.7,.2,1),
+                  transform .15s cubic-bezier(.2,.7,.2,1);
+    }
+    .nav-tab:hover { color: #F4F1E6; background: rgba(232,226,206,.06); }
+    .nav-tab:active { transform: scale(.97); }
+    .nav-tab .nav-ico { font-size: .95rem; line-height: 1; }
+    .nav-tab.nav-active {
+      color: #F4F1E6;
+      background: linear-gradient(180deg, rgba(91,130,69,.24), rgba(91,130,69,.10));
+      border-color: rgba(157,185,125,.32);
+      box-shadow: inset 0 1px 0 rgba(232,226,206,.08), 0 10px 24px -14px rgba(0,0,0,.65);
+    }
+
+    /* ---- Tab panels: cascading entrance on every switch ---- */
+    .panel > * { opacity: 0; animation: enterUp .5s cubic-bezier(.2,.7,.2,1) both; }
+    .panel > *:nth-child(1) { animation-delay: 40ms; }
+    .panel > *:nth-child(2) { animation-delay: 100ms; }
+    .panel > *:nth-child(3) { animation-delay: 160ms; }
+    .panel > *:nth-child(4) { animation-delay: 220ms; }
+    .panel > *:nth-child(5) { animation-delay: 280ms; }
+    .panel > *:nth-child(6) { animation-delay: 340ms; }
 
     /* =========================================================
        Motion · one orchestrated entrance + micro-interactions
@@ -392,92 +487,119 @@
 
 <body class="antialiased min-h-screen leaf-bg">
 
-  <!-- ============== HEADER ============== -->
-  <header class="header-enter relative overflow-hidden bg-gradient-to-br from-moss-900 via-moss-700 to-moss-400 text-bark-50 grain">
-    <div class="max-w-7xl mx-auto px-6 sm:px-10 py-7 sm:py-9 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 relative z-10">
-      <div class="flex items-center gap-4">
-        <div class="w-14 h-14 rounded-2xl bg-bark-50/15 backdrop-blur-sm border border-bark-50/30 grid place-items-center shadow-leaf">
-          <!-- Leaf glyph -->
-          <svg viewBox="0 0 64 64" class="w-9 h-9 text-bark-50" fill="currentColor" aria-hidden="true">
-            <path d="M52 6C30 8 14 22 8 40c-2 6-2 12 0 18 2-22 18-36 40-40-12 4-22 14-26 28-3 11 0 18 8 22 4-20 18-36 38-44 6-2 8-6 6-12-2-6-8-8-22-6z"/>
-            <path d="M14 52c-2 1-4 3-4 6 4-1 7-3 9-6l-5 0z" opacity=".7"/>
-          </svg>
-        </div>
-        <div>
-          <p class="uppercase tracking-[0.22em] text-[11px] text-bark-100/80 font-medium">Garden Intelligence</p>
-          <h1 class="display text-3xl sm:text-4xl font-semibold leading-tight">
-            MicroGrow <span class="text-clay-400">·</span> Hyper-Local Garden Planner
-          </h1>
-          <p class="text-sm text-bark-100/85 mt-1 max-w-xl">
-            Real-time weather + your yard's micro-climate — frost dates and planting windows tuned to the soil under your boots.
-          </p>
-        </div>
-      </div>
-      <div class="flex items-center gap-3 text-sm">
-        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-bark-50/10 border border-bark-50/20">
-          <span class="relative flex h-2.5 w-2.5">
-            <span class="absolute inline-flex h-full w-full rounded-full bg-clay-400 opacity-75 animate-ping"></span>
-            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-clay-500"></span>
+  <!-- ============== APP SHELL · HEADER + NAV ============== -->
+  <header class="app-shell-header">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between gap-4 py-4">
+        <a href="#overview" class="flex items-center gap-3.5 min-w-0 group" aria-label="MicroGrow home">
+          <span class="brand-mark shrink-0" aria-hidden="true">
+            <svg viewBox="0 0 64 64" class="w-6 h-6 text-bark-50" fill="currentColor">
+              <path d="M52 6C30 8 14 22 8 40c-2 6-2 12 0 18 2-22 18-36 40-40-12 4-22 14-26 28-3 11 0 18 8 22 4-20 18-36 38-44 6-2 8-6 6-12-2-6-8-8-22-6z"/>
+              <path d="M14 52c-2 1-4 3-4 6 4-1 7-3 9-6l-5 0z" opacity=".7"/>
+            </svg>
           </span>
-          <span id="liveLabel" class="text-bark-50/90 font-medium">Awaiting location…</span>
-        </span>
-        <button id="themeToggle" type="button" aria-label="Toggle theme" title="Switch light / dark theme"
-          class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-bark-50/10 border border-bark-50/20 hover:bg-bark-50/20 transition text-bark-50/90 text-lg leading-none">
-          <span id="themeToggleIcon">🌙</span>
-        </button>
+          <span class="min-w-0">
+            <span class="block uppercase tracking-[0.26em] text-[10px] text-bark-100/70 font-medium">Garden Intelligence</span>
+            <span class="block display text-xl sm:text-2xl font-semibold text-bark-50 leading-tight truncate">
+              MicroGrow <span class="text-clay-400">·</span> <span class="hidden md:inline">Hyper-Local Planner</span>
+            </span>
+          </span>
+        </a>
+        <div class="flex items-center gap-2.5 shrink-0">
+          <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-bark-50/10 border border-bark-50/20">
+            <span class="relative flex h-2 w-2">
+              <span class="absolute inline-flex h-full w-full rounded-full bg-clay-400 opacity-75 animate-ping"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-clay-500"></span>
+            </span>
+            <span id="liveLabel" class="text-bark-50/90 font-medium text-xs sm:text-sm">Awaiting location…</span>
+          </span>
+          <button id="themeToggle" type="button" aria-label="Toggle theme" title="Switch light / dark theme"
+            class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-bark-50/10 border border-bark-50/20 hover:bg-bark-50/25 hover:scale-105 active:scale-95 transition text-bark-50/90 text-base leading-none">
+            <span id="themeToggleIcon">☀️</span>
+          </button>
+        </div>
       </div>
+
+      <nav class="nav-tabs" aria-label="Primary navigation">
+        <button type="button" data-tab="overview" class="nav-tab nav-active"><span class="nav-ico">🌤️</span>Overview</button>
+        <button type="button" data-tab="garden" class="nav-tab"><span class="nav-ico">🪴</span>Garden Setup</button>
+        <button type="button" data-tab="wildlife" class="nav-tab"><span class="nav-ico">🦉</span>Wildlife</button>
+        <button type="button" data-tab="planting" class="nav-tab"><span class="nav-ico">🥕</span>Planting</button>
+        <button type="button" data-tab="ai" class="nav-tab"><span class="nav-ico">✨</span>AI Helper</button>
+        <button type="button" data-tab="account" class="nav-tab"><span class="nav-ico">🔐</span>Account</button>
+      </nav>
     </div>
   </header>
 
-  <!-- ============== MAIN ============== -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-10">
-    <div class="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6 lg:gap-8">
+  <!-- ============== MAIN · APP-SHELL PANELS ============== -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
 
-      <!-- =========== SIDEBAR =========== -->
-      <aside class="enter-cascade space-y-5 lg:sticky lg:top-6 lg:self-start">
-
-        <!-- Location card -->
-        <!-- Auth card: sign-up / sign-in / signed-in / check-inbox states. Toggled by auth.js via window.microgrowAuth + window.microgrowSync hooks. -->
-    <section id="authCard" class="relative bg-white border border-bark-100 rounded-2xl shadow-soil p-5 overflow-hidden">
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="display text-lg font-semibold text-moss-800">🔐 Account</h2>
-        <span id="authModeBadge" class="text-[11px] uppercase tracking-wider text-bark-600">Signed&nbsp;out</span>
-      </div>
-
-      <!-- Signed-out: form -->
-      <div id="authSignedOutPanel">
-        <label for="authEmailInput" class="text-xs font-medium text-bark-600">Email</label>
-        <input id="authEmailInput" type="email" autocomplete="email" placeholder="you@example.com" class="mt-1 w-full rounded-xl border-bark-200 bg-bark-50/40 px-3 py-2 text-sm text-bark-900 placeholder-bark-400 focus:border-moss-500 focus:ring-2 focus:ring-moss-200 outline-none" />
-        <label for="authPasswordInput" class="mt-3 block text-xs font-medium text-bark-600">Password (≥ 6 chars)</label>
-        <input id="authPasswordInput" type="password" autocomplete="current-password" placeholder="••••••••" class="mt-1 w-full rounded-xl border-bark-200 bg-bark-50/40 px-3 py-2 text-sm text-bark-900 placeholder-bark-400 focus:border-moss-500 focus:ring-2 focus:ring-moss-200 outline-none" />
-        <div class="grid grid-cols-2 gap-2 mt-3">
-          <button id="authSignUpBtn" type="button" class="inline-flex items-center justify-center gap-2 bg-moss-700 hover:bg-moss-800 active:bg-moss-900 text-bark-50 text-sm font-medium px-3 py-2 rounded-xl shadow-soil transition disabled:opacity-50">Sign up</button>
-          <button id="authSignInBtn" type="button" class="inline-flex items-center justify-center gap-2 bg-bark-100 hover:bg-bark-200 text-bark-900 text-sm font-medium px-3 py-2 rounded-xl transition disabled:opacity-50">Sign in</button>
+    <!-- =========== PANEL · ACCOUNT =========== -->
+    <section data-panel="account" class="panel hidden space-y-6">
+      <!-- Auth card: sign-up / sign-in / signed-in / check-inbox states. Toggled by auth.js via window.microgrowAuth + window.microgrowSync hooks. -->
+      <section id="authCard" class="relative bg-white border border-bark-100 rounded-2xl shadow-soil p-5 overflow-hidden">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="display text-lg font-semibold text-moss-800">🔐 Account</h2>
+          <span id="authModeBadge" class="text-[11px] uppercase tracking-wider text-bark-600">Signed&nbsp;out</span>
         </div>
-        <div class="mt-2 flex items-center justify-between text-[11px] text-bark-600">
-          <button id="authForgotBtn" type="button" class="underline hover:text-moss-700 disabled:opacity-50">Forgot password?</button>
-          <button id="authResendBtn" type="button" class="underline hover:text-moss-700 disabled:opacity-50">Resend confirmation</button>
+
+        <!-- Signed-out: form -->
+        <div id="authSignedOutPanel">
+          <label for="authEmailInput" class="text-xs font-medium text-bark-600">Email</label>
+          <input id="authEmailInput" type="email" autocomplete="email" placeholder="you@example.com" class="mt-1 w-full rounded-xl border-bark-200 bg-bark-50/40 px-3 py-2 text-sm text-bark-900 placeholder-bark-400 focus:border-moss-500 focus:ring-2 focus:ring-moss-200 outline-none" />
+          <label for="authPasswordInput" class="mt-3 block text-xs font-medium text-bark-600">Password (≥ 6 chars)</label>
+          <input id="authPasswordInput" type="password" autocomplete="current-password" placeholder="••••••••" class="mt-1 w-full rounded-xl border-bark-200 bg-bark-50/40 px-3 py-2 text-sm text-bark-900 placeholder-bark-400 focus:border-moss-500 focus:ring-2 focus:ring-moss-200 outline-none" />
+          <div class="grid grid-cols-2 gap-2 mt-3">
+            <button id="authSignUpBtn" type="button" class="inline-flex items-center justify-center gap-2 bg-moss-700 hover:bg-moss-800 active:bg-moss-900 text-bark-50 text-sm font-medium px-3 py-2 rounded-xl shadow-soil transition disabled:opacity-50">Sign up</button>
+            <button id="authSignInBtn" type="button" class="inline-flex items-center justify-center gap-2 bg-bark-100 hover:bg-bark-200 text-bark-900 text-sm font-medium px-3 py-2 rounded-xl transition disabled:opacity-50">Sign in</button>
+          </div>
+          <div class="mt-2 flex items-center justify-between text-[11px] text-bark-600">
+            <button id="authForgotBtn" type="button" class="underline hover:text-moss-700 disabled:opacity-50">Forgot password?</button>
+            <button id="authResendBtn" type="button" class="underline hover:text-moss-700 disabled:opacity-50">Resend confirmation</button>
+          </div>
         </div>
-      </div>
 
-      <!-- Check-inbox: shown after sign-up while email confirmation is pending -->
-      <div id="authConfirmPanel" class="hidden">
-        <p class="text-sm text-bark-800">📬 Check your inbox — we sent a confirmation link.</p>
-        <p class="text-[11px] text-bark-600 mt-1">Click the link, then come back. We'll auto-detect the session.</p>
-        <button id="authResendBtn2" type="button" class="mt-3 w-full inline-flex items-center justify-center gap-2 bg-bark-100 hover:bg-bark-200 text-bark-900 text-sm font-medium px-3 py-2 rounded-xl transition">Resend confirmation email</button>
-      </div>
+        <!-- Check-inbox: shown after sign-up while email confirmation is pending -->
+        <div id="authConfirmPanel" class="hidden">
+          <p class="text-sm text-bark-800">📬 Check your inbox — we sent a confirmation link.</p>
+          <p class="text-[11px] text-bark-600 mt-1">Click the link, then come back. We'll auto-detect the session.</p>
+          <button id="authResendBtn2" type="button" class="mt-3 w-full inline-flex items-center justify-center gap-2 bg-bark-100 hover:bg-bark-200 text-bark-900 text-sm font-medium px-3 py-2 rounded-xl transition">Resend confirmation email</button>
+        </div>
 
-      <!-- Signed-in: show email + sign out -->
-      <div id="authSignedInPanel" class="hidden">
-        <p class="text-sm text-bark-800">Signed in as <span id="authEmail" class="font-semibold mono"></span></p>
-        <p class="text-[11px] text-moss-700 mt-1">✓ Your yard, last location, and query history are syncing.</p>
-        <button id="authSignOutBtn" type="button" class="mt-3 w-full inline-flex items-center justify-center gap-2 bg-bark-100 hover:bg-bark-200 text-bark-900 text-sm font-medium px-3 py-2 rounded-xl transition">Sign out</button>
-      </div>
+        <!-- Signed-in: show email + sign out -->
+        <div id="authSignedInPanel" class="hidden">
+          <p class="text-sm text-bark-800">Signed in as <span id="authEmail" class="font-semibold mono"></span></p>
+          <p class="text-[11px] text-moss-700 mt-1">✓ Your yard, last location, and query history are syncing.</p>
+          <button id="authSignOutBtn" type="button" class="mt-3 w-full inline-flex items-center justify-center gap-2 bg-bark-100 hover:bg-bark-200 text-bark-900 text-sm font-medium px-3 py-2 rounded-xl transition">Sign out</button>
+        </div>
 
-      <p id="authStatus" class="text-[11px] mt-2 min-h-[1em] font-medium"></p>
+        <p id="authStatus" class="text-[11px] mt-2 min-h-[1em] font-medium"></p>
+      </section>
+
+      <!-- Privacy & Data card -->
+      <article class="bg-white/60 border border-bark-100 rounded-2xl shadow-soil p-5">
+        <details class="text-sm text-bark-700">
+          <summary class="cursor-pointer display text-base font-semibold text-bark-900">🛡️ Privacy &amp; data — what we collect</summary>
+          <div class="mt-3 leading-relaxed">
+            <p><strong>Signed-out (default):</strong> nothing is stored or remembered. No accounts, no cookies, no localStorage, no analytics, no fingerprinting. The page refreshes and you start fresh.</p>
+            <p class="mt-2"><strong>Signed-in:</strong> a single encrypted auth token is saved to your browser's localStorage so you stay signed in across reloads. This is the <span class="mono">JWT</span> token Supabase issues at sign-in — it is not your password. Your saved yard profile, last queried location, and recent query history are stored server-side in <a class="underline hover:text-moss-700" href="https://supabase.com/" target="_blank" rel="noopener">Supabase</a> under row-level security scoped to your user id. Nothing is shared with anyone else.</p>
+            <p class="mt-2">Each location query sends your typed string (or coordinates) to the third-party services below so they can return live data:</p>
+            <ul class="mt-2 ml-4 list-disc space-y-1">
+              <li><a class="underline hover:text-moss-700" href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> — geocode, forecast, and air-quality. They see the city/ZIP you typed.</li>
+              <li><a class="underline hover:text-moss-700" href="https://www.inaturalist.org/" target="_blank" rel="noopener">iNaturalist</a> — wildlife observations. They see your approximate lat/lon.</li>
+              <li><a class="underline hover:text-moss-700" href="https://supabase.com/" target="_blank" rel="noopener">Supabase</a> — auth + per-user database (only when signed in).</li>
+              <li><a class="underline hover:text-moss-700" href="https://ai.google.dev/" target="_blank" rel="noopener">Google Gemini</a> — AI plant lookup (only sends the plant name you typed).</li>
+            </ul>
+            <p class="mt-2">Fonts are loaded from <span class="mono">fonts.googleapis.com</span>. Direct questions to <a class="underline hover:text-moss-700" href="https://github.com/lobstahlololo/garden-thing" target="_blank" rel="noopener">the repository</a>.</p>
+          </div>
+        </details>
+      </article>
     </section>
 
-    <section class="relative bg-white border border-bark-100 rounded-2xl shadow-soil p-5 overflow-hidden">
+    <!-- =========== PANEL · GARDEN SETUP =========== -->
+    <section data-panel="garden" class="panel hidden space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <section class="relative bg-white border border-bark-100 rounded-2xl shadow-soil p-5 overflow-hidden">
           <div class="flex items-center justify-between mb-3">
             <h2 class="display text-lg font-semibold text-moss-800">📍 Location</h2>
             <span class="text-[11px] uppercase tracking-wider text-bark-600">Step 1</span>
@@ -543,22 +665,21 @@
             <option value="loam" selected>🟢 Rich loam</option>
           </select>
         </section>
+      </div>
 
-        <!-- Action -->
+      <div class="flex flex-col sm:flex-row sm:items-center gap-3">
         <button id="calculateBtn"
-          class="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-br from-clay-500 to-clay-700 hover:from-clay-600 hover:to-clay-700 text-bark-50 text-base font-semibold px-5 py-3.5 rounded-2xl shadow-leaf transition active:scale-[.99]">
+          class="inline-flex items-center justify-center gap-2 bg-gradient-to-br from-clay-500 to-clay-700 hover:from-clay-600 hover:to-clay-700 text-bark-50 text-base font-semibold px-6 py-3.5 rounded-2xl shadow-leaf transition active:scale-[.99]">
           🌱 Calculate Micro-Climate &amp; Fetch Weather
         </button>
-
-        <p class="text-[11px] text-bark-600 text-center px-2">
+        <p class="text-[11px] text-bark-600">
           Edits to dropdowns update the dashboard instantly. The button re-pulls live data.
         </p>
-      </aside>
+      </div>
+    </section>
 
-      <!-- =========== DASHBOARD =========== -->
-      <section class="enter-cascade-dash space-y-6 min-w-0">
-
-        <!-- Live weather + Scorecard row -->
+      <!-- =========== PANEL · OVERVIEW =========== -->
+      <section data-panel="overview" class="panel space-y-6 min-w-0">
         <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
 
           <!-- Live weather card -->
@@ -638,7 +759,21 @@
           </article>
         </div>
 
-        <!-- Wildlife risks card -->
+        <!-- Alerts feed -->
+        <article class="bg-white border border-bark-100 rounded-2xl shadow-soil p-6">
+          <div class="flex items-center justify-between gap-3 flex-wrap">
+            <div>
+              <p class="text-[11px] uppercase tracking-wider text-bark-600 font-medium">Dynamic Alerts Feed</p>
+              <h3 class="display text-2xl font-semibold text-bark-900 mt-0.5">Recommendations for your yard</h3>
+            </div>
+            <span id="alertCount" class="text-[11px] px-2.5 py-1 rounded-full bg-bark-100 text-bark-800 font-medium">0 alerts</span>
+          </div>
+          <ul id="alertList" class="mt-4 space-y-2.5"></ul>
+        </article>
+      </section>
+
+      <!-- =========== PANEL · WILDLIFE =========== -->
+      <section data-panel="wildlife" class="panel hidden space-y-6 min-w-0">
         <article id="wildlifeCard" class="relative bg-white border border-bark-100 rounded-2xl shadow-soil p-6 overflow-hidden">
           <div class="flex items-start justify-between gap-4">
             <div class="min-w-0">
@@ -664,20 +799,10 @@
           <div id="wildlifeBeneficials" class="mt-4"></div>
           <p id="wildlifeFootnote" class="text-[11px] text-bark-600 mt-3 max-w-prose"></p>
         </article>
+      </section>
 
-        <!-- Alerts feed -->
-        <article class="bg-white border border-bark-100 rounded-2xl shadow-soil p-6">
-          <div class="flex items-center justify-between gap-3 flex-wrap">
-            <div>
-              <p class="text-[11px] uppercase tracking-wider text-bark-600 font-medium">Dynamic Alerts Feed</p>
-              <h3 class="display text-2xl font-semibold text-bark-900 mt-0.5">Recommendations for your yard</h3>
-            </div>
-            <span id="alertCount" class="text-[11px] px-2.5 py-1 rounded-full bg-bark-100 text-bark-800 font-medium">0 alerts</span>
-          </div>
-          <ul id="alertList" class="mt-4 space-y-2.5"></ul>
-        </article>
-
-        <!-- Planting table -->
+      <!-- =========== PANEL · PLANTING =========== -->
+      <section data-panel="planting" class="panel hidden space-y-6 min-w-0">
         <article class="bg-white border border-bark-100 rounded-2xl shadow-soil p-6 overflow-hidden">
           <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
             <div>
@@ -704,8 +829,10 @@
             </table>
           </div>
         </article>
+      </section>
 
-        
+      <!-- =========== PANEL · AI HELPER =========== -->
+      <section data-panel="ai" class="panel hidden space-y-6 min-w-0">
         <!-- Gemini AI Plant Helper -->
         <article id="geminiCard" class="relative bg-white border border-bark-100 rounded-2xl shadow-soil p-6 overflow-hidden">
           <div class="pointer-events-none absolute -top-10 -right-10 w-36 h-36 rounded-full bg-frost-300/10"></div>
@@ -736,6 +863,15 @@
               </button>
             </div>
 
+            <div class="mt-3.5 flex flex-wrap items-center gap-2">
+              <span class="text-[11px] uppercase tracking-wider text-bark-600 font-medium">Try:</span>
+              <button type="button" data-gemini-suggest="Okra" class="text-xs px-3 py-1.5 rounded-full bg-bark-50/10 border border-bark-50/20 text-bark-100/80 hover:bg-bark-50/20 hover:text-bark-50 active:scale-95 transition">Okra</button>
+              <button type="button" data-gemini-suggest="Dragonfruit" class="text-xs px-3 py-1.5 rounded-full bg-bark-50/10 border border-bark-50/20 text-bark-100/80 hover:bg-bark-50/20 hover:text-bark-50 active:scale-95 transition">Dragonfruit</button>
+              <button type="button" data-gemini-suggest="Asparagus" class="text-xs px-3 py-1.5 rounded-full bg-bark-50/10 border border-bark-50/20 text-bark-100/80 hover:bg-bark-50/20 hover:text-bark-50 active:scale-95 transition">Asparagus</button>
+              <button type="button" data-gemini-suggest="Rosemary" class="text-xs px-3 py-1.5 rounded-full bg-bark-50/10 border border-bark-50/20 text-bark-100/80 hover:bg-bark-50/20 hover:text-bark-50 active:scale-95 transition">Rosemary</button>
+              <button type="button" data-gemini-suggest="Sweet potato" class="text-xs px-3 py-1.5 rounded-full bg-bark-50/10 border border-bark-50/20 text-bark-100/80 hover:bg-bark-50/20 hover:text-bark-50 active:scale-95 transition">Sweet potato</button>
+            </div>
+
             <p id="geminiStatus" class="text-[11px] text-bark-600 mt-2 min-h-[1em]"></p>
 
             <!-- Result card (hidden until a lookup returns) -->
@@ -753,33 +889,77 @@
             </div>
           </div>
         </article>
+      </section>
 
-        <!-- Privacy & Data card -->
-        <article class="bg-white/60 border border-bark-100 rounded-2xl shadow-soil p-5">
-          <details class="text-sm text-bark-700">
-            <summary class="cursor-pointer display text-base font-semibold text-bark-900">🛡️ Privacy &amp; data — what we collect</summary>
-            <div class="mt-3 leading-relaxed">
-              <p><strong>Signed-out (default):</strong> nothing is stored or remembered. No accounts, no cookies, no localStorage, no analytics, no fingerprinting. The page refreshes and you start fresh.</p>
-              <p class="mt-2"><strong>Signed-in:</strong> a single encrypted auth token is saved to your browser's localStorage so you stay signed in across reloads. This is the <span class="mono">JWT</span> token Supabase issues at sign-in — it is not your password. Your saved yard profile, last queried location, and recent query history are stored server-side in <a class="underline hover:text-moss-700" href="https://supabase.com/" target="_blank" rel="noopener">Supabase</a> under row-level security scoped to your user id. Nothing is shared with anyone else.</p>
-              <p class="mt-2">Each location query sends your typed string (or coordinates) to the third-party services below so they can return live data:</p>
-              <ul class="mt-2 ml-4 list-disc space-y-1">
-                <li><a class="underline hover:text-moss-700" href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> — geocode, forecast, and air-quality. They see the city/ZIP you typed.</li>
-                <li><a class="underline hover:text-moss-700" href="https://www.inaturalist.org/" target="_blank" rel="noopener">iNaturalist</a> — wildlife observations. They see your approximate lat/lon.</li>
-                <li><a class="underline hover:text-moss-700" href="https://supabase.com/" target="_blank" rel="noopener">Supabase</a> — auth + per-user database (only when signed in).</li>
-                <li><a class="underline hover:text-moss-700" href="https://ai.google.dev/" target="_blank" rel="noopener">Google Gemini</a> — AI plant lookup (only sends the plant name you typed).</li>
-              </ul>
-              <p class="mt-2">Fonts are loaded from <span class="mono">fonts.googleapis.com</span>. Direct questions to <a class="underline hover:text-moss-700" href="https://github.com/lobstahlololo/garden-thing" target="_blank" rel="noopener">the repository</a>.</p>
-            </div>
-          </details>
-        </article>
-
-        <p class="text-[11px] text-bark-600 text-center pt-2">
+      <p class="text-[11px] text-bark-600 text-center pt-2">
 
           Weather data · <a class="underline hover:text-moss-700" href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> · Wildlife observations · <a class="underline hover:text-moss-700" href="https://www.inaturalist.org/" target="_blank" rel="noopener">iNaturalist</a> · Baseline frost dates are regional heuristics, tune them to your 10-year USDA/NWS average.
-        </p>
-      </section>
-    </div>
+      </p>
   </main>
+
+  <script>
+    /* ============================================================
+       App-shell · tab switching + quick-ask chips
+       ============================================================ */
+    (function () {
+      'use strict';
+      const tabs   = Array.from(document.querySelectorAll('.nav-tab[data-tab]'));
+      const panels = Array.from(document.querySelectorAll('section[data-panel]'));
+      const valid  = (name) => tabs.some((t) => t.dataset.tab === name);
+
+      function showTab(name, syncHash) {
+        if (!valid(name)) name = 'overview';
+        let found = false;
+        tabs.forEach((t) => {
+          const on = t.dataset.tab === name;
+          t.classList.toggle('nav-active', on);
+          if (on) t.setAttribute('aria-selected', 'true');
+          else t.removeAttribute('aria-selected');
+        });
+        panels.forEach((p) => {
+          const on = p.dataset.panel === name;
+          p.classList.toggle('hidden', !on);
+          if (on) found = true;
+        });
+        // Safety: if the panel is missing, never leave every panel hidden
+        if (!found) {
+          const ov = panels.find((p) => p.dataset.panel === 'overview');
+          if (ov) ov.classList.remove('hidden');
+        }
+        if (syncHash && location.hash !== '#' + name) {
+          try { history.replaceState(null, '', '#' + name); } catch (_) {}
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      // a11y: tablist / tab / tabpanel roles
+      document.querySelectorAll('.nav-tabs').forEach((n) => n.setAttribute('role', 'tablist'));
+      tabs.forEach((t) => t.setAttribute('role', 'tab'));
+      panels.forEach((p) => p.setAttribute('role', 'tabpanel'));
+
+      tabs.forEach((t) => t.addEventListener('click', () => showTab(t.dataset.tab, true)));
+      window.addEventListener('hashchange', () => {
+        const name = (location.hash || '').replace(/^#/, '');
+        showTab(valid(name) ? name : 'overview', false);
+      });
+
+      const initial = (location.hash || '').replace(/^#/, '');
+      showTab(valid(initial) ? initial : 'overview', false);
+    })();
+
+    /* Quick-ask chips — one click fills the Gemini input and fires the lookup */
+    (function () {
+      'use strict';
+      document.querySelectorAll('[data-gemini-suggest]').forEach((chip) => {
+        chip.addEventListener('click', () => {
+          const input = document.getElementById('geminiPlantInput');
+          if (input) input.value = chip.getAttribute('data-gemini-suggest');
+          const btn = document.getElementById('geminiLookupBtn');
+          if (btn) btn.click();
+        });
+      });
+    })();
+  </script>
 
   <script>
     /* ============================================================
@@ -1645,9 +1825,9 @@
       if (els.inPanel)   els.inPanel.classList.toggle('hidden',   mode !== 'in');
       if (els.emailSpan && (mode === 'in')) els.emailSpan.textContent = email || '';
       if (els.badge) {
-        els.badge.textContent = mode === 'in' ? 'Signed in'
-                              : mode === 'confirm' ? 'Awaiting confirmation'
-                              : 'Signed out';
+        els.badge.textContent = mode === 'in' ? 'Signed in'
+                              : mode === 'confirm' ? 'Awaiting confirmation'
+                              : 'Signed out';
       }
     }
 
@@ -1717,7 +1897,7 @@
         if (!email) { setStatus('\u26A0\uFE0F Enter your email above first.', 'warn'); return; }
         // Use signUp to resend confirmation. The user may or may not exist; auth.js
         // returns a generic ok shape either way (anti-enumeration).
-        const password = els.passwordInput.value || ' 123456 '; // dummy; ignored if account exists, harmless if not
+        const password = els.passwordInput.value || '\u00A0123456\u00A0'; // dummy; ignored if account exists, harmless if not
         if (els.btnResend)  els.btnResend.disabled = true;
         if (els.btnResend2) els.btnResend2.disabled = true;
         setStatus('Sending\u2026', 'info');
@@ -1760,6 +1940,5 @@
   })();
   </script>
 
-</body>
 </body>
 </html>
