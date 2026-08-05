@@ -1,0 +1,11 @@
+# Local environment secrets — never commit
+.env
+.env.local
+.env.*.local
+
+# Python bytecode / caches
+__pycache__/
+*.py[cod]
+
+# Freebuff tooling scratch
+.buffy-probe

@@ -22,6 +22,7 @@
   <script src="wildlife.js" defer></script>
   <script src="gemini.js" defer></script>
   <script src="gemini-ui.js" defer></script>
+  <script src="legal.js" defer></script>
   <script>
     tailwind.config = {
       theme: {
@@ -591,8 +592,22 @@
               <li><a class="underline hover:text-moss-700" href="https://ai.google.dev/" target="_blank" rel="noopener">Google Gemini</a> — AI plant lookup (only sends the plant name you typed).</li>
             </ul>
             <p class="mt-2">Fonts are loaded from <span class="mono">fonts.googleapis.com</span>. Direct questions to <a class="underline hover:text-moss-700" href="https://github.com/lobstahlololo/garden-thing" target="_blank" rel="noopener">the repository</a>.</p>
+            <button type="button" data-open-modal="privacy" class="mt-3 text-xs font-medium text-moss-700 underline underline-offset-2 hover:text-moss-800 transition">Read the full privacy policy →</button>
           </div>
         </details>
+      </article>
+
+      <!-- Legal links -->
+      <article class="bg-white/60 border border-bark-100 rounded-2xl shadow-soil p-5">
+        <div class="flex items-center justify-between mb-1">
+          <h2 class="display text-base font-semibold text-moss-800">📜 Legal</h2>
+          <span class="text-[11px] uppercase tracking-wider text-bark-600">Fine print</span>
+        </div>
+        <p class="text-sm text-bark-700">MicroGrow is a free, open-source hobby project — read the fine print before relying on it.</p>
+        <div class="mt-3 flex flex-wrap gap-2">
+          <button type="button" data-open-modal="privacy" class="inline-flex items-center justify-center gap-2 bg-bark-100 hover:bg-bark-200 text-bark-900 text-sm font-medium px-3.5 py-2 rounded-xl transition">🛡️ Privacy Policy</button>
+          <button type="button" data-open-modal="terms" class="inline-flex items-center justify-center gap-2 bg-bark-100 hover:bg-bark-200 text-bark-900 text-sm font-medium px-3.5 py-2 rounded-xl transition">📋 Terms &amp; Conditions</button>
+        </div>
       </article>
     </section>
 
